@@ -1,4 +1,4 @@
-import {getRandomArrayElement, getRandomDate, getRandomInteger} from '../utils.js';
+import {getRandomArrayElement, getRandomDate} from '../utils.js';
 import dayjs  from 'dayjs';
 
 const NAMES = [
