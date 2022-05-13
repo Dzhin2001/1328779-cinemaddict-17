@@ -2,17 +2,17 @@ import {render} from '../render.js';
 import NavListView from '../view/nav-list-view';
 import SortListView from '../view/sort-list-view';
 import ButtonMoreView from '../view/button-more-view';
-import FilmsView from '../view/films-view.js';
+import FilmView from '../view/film-view.js';
 import FilmsListView from '../view/films-list-view';
 import PopupView from '../view/popupView';
 
-const onFilmsClick = () => {
-  render(new PopupView(), document.body);
-};
-
 export default class FilmsPresenter {
 
-  init (siteMainElement) {
+  init (siteMainElement, filmsModel) {
+
+
+    this.filmsModel = filmsModel;
+    this.listFilms = [...this.filmsModel.films];
 
     this.filmsListView = new FilmsListView();
 
@@ -25,9 +25,14 @@ export default class FilmsPresenter {
 
     render(new ButtonMoreView(), this.buttonMoreElement);
 
-    for (let i = 0; i < 5; i++) {
-      const filmsView = new FilmsView();
+    for (const film of this.listFilms) {
+      const filmsView = new FilmView(film);
       render(filmsView, this.filmsContainer);
+
+      const onFilmsClick = () => {
+        render(new PopupView(film,this.filmsModel.getComments(film)), document.body);
+      };
+
       filmsView.getElement().addEventListener('click',onFilmsClick);
     }
 
