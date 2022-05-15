@@ -54,7 +54,7 @@ export default class FilmsPresenter {
         document.body.classList.add('hide-overflow');
         this.#popupView = new PopupView(film, this.#filmsModel.getComments(film));
         render(this.#popupView, document.body);
-        this.#btnClosePopup = document.body.querySelector('.film-details__close-btn');
+        this.#btnClosePopup = this.#popupView.element.querySelector('.film-details__close-btn');
         this.#btnClosePopup.addEventListener('click',onBtnCloseClick);
         document.addEventListener('keydown', onEscKeyDown);
       };
