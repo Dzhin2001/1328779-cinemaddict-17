@@ -11,7 +11,7 @@ export default class FilmsPresenter {
   #listFilms = null;
   #film = null;
   #filmsListView = null;
-  #filmsView = null
+  #filmsView = null;
   #buttonMoreElement = null;
   #filmsContainer = null;
   #popupView = null;
