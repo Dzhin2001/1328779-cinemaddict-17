@@ -61,12 +61,12 @@ export default class FilmsPresenter {
   #onPopupFilmClick = (evt) => {
     const filmId = +evt.target.closest('article').id;
     const film = this.#filmsModel.getFilm(filmId);
-    document.body.classList.add('hide-overflow');
     this.#popupView = new PopupView(film, this.#filmsModel.getComments(film));
     render(this.#popupView, document.body);
+    document.body.classList.add('hide-overflow');
+    document.addEventListener('keydown', this.#onPopupEscKeyDown);
     this.#btnClosePopup = this.#popupView.element.querySelector('.film-details__close-btn');
     this.#btnClosePopup.addEventListener('click',this.#onPopupBtnCloseClick);
-    document.addEventListener('keydown', this.#onPopupEscKeyDown);
   };
 
 }
