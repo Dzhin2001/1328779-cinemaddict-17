@@ -1,4 +1,5 @@
 import {getRandomArrayElement, getRandomInteger, getRandomPosNeg, getRandomDate} from '../utils.js';
+import dayjs  from 'dayjs';
 
 const DESCRIPTION_COUNT = {
   min: 1,
@@ -122,10 +123,10 @@ const generateDescription = () => {
     .join(' ');
 };
 
-const generateComments = (comments) => {
+const generateComments = (commentsCount) => {
   const {min, max} = COMMENT_COUNT;
   return [...Array(getRandomInteger(min, max))]
-    .map( () => getRandomArrayElement(comments).idComment );
+    .map( () => getRandomInteger(1, commentsCount) );
 };
 
 const generateGenres = () => {
@@ -143,7 +144,7 @@ const getDuration = (minutes) => {
   return (duration.hours ? `${duration.hours}h ` : '')  + (duration.minutes ? `${duration.minutes}m` : '');
 };
 
-const generateFilm = (comments) => ({
+const generateFilm = (commentsCount) => ({
   idFilm: getIdFilm(),
   title: getRandomArrayElement(TITLES),
   originalTitle: getRandomArrayElement(TITLES),
@@ -152,16 +153,16 @@ const generateFilm = (comments) => ({
   director: getRandomArrayElement(NAMES),
   writer: getRandomArrayElement(NAMES),
   cast: getRandomArrayElement(NAMES),
-  releaseDate: getRandomDate(1930),
+  releaseDate: getRandomDate(dayjs('1930','YYYY')),
   duration:  getDuration(getRandomInteger(1, 8)*15),
   country: getRandomArrayElement(COUNTRIES),
   genres: generateGenres(),
   description: generateDescription(),
   fullDescription: generateDescription(),
   ageRating: getRandomInteger(0, 18),
-  comments: generateComments(comments),
+  comments: generateComments(commentsCount),
 });
 
-const generateFilms = (filmCount, comments) => Array.from({length: filmCount}, () => generateFilm(comments) );
+const generateFilms = (filmsCount, commentsCount) => Array.from({length: filmsCount}, () => generateFilm(commentsCount) );
 
 export {generateFilms};

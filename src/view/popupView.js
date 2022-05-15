@@ -10,7 +10,7 @@ const dateComment = (date) => {
   if( days < 10 ) {
     return `${days} days ago`;
   }
-  return datejs.format('MM/DD/YYYY hh:mm');
+  return datejs.format('DD/MM/YYYY hh:mm');
 
 };
 
@@ -154,24 +154,28 @@ const popupTemplate = (film, comments) => `
   `;
 
 export default class PopupView {
+  #element = null;
+  #film = null;
+  #comments = null;
+
   constructor(film, comments) {
-    this.film = film;
-    this.comments = comments;
+    this.#film = film;
+    this.#comments = comments;
   }
 
-  getTemplate() {
-    return popupTemplate(this.film, this.comments);
+  get template() {
+    return popupTemplate(this.#film, this.#comments);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

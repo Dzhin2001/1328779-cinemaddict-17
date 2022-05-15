@@ -34,7 +34,7 @@ const generateComment = () => ({
   idComment: getIdComment(),
   comment: getRandomArrayElement(COMMENTS),
   author: getRandomArrayElement(NAMES),
-  datetime: getRandomDate(dayjs().format('YYYY'))
+  datetime: getRandomDate(dayjs().subtract(6, 'month'))
 });
 
 export const generateComments = (commentsCount) => Array.from({length: commentsCount}, generateComment );
