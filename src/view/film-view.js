@@ -2,7 +2,7 @@ import {createElement} from '../render.js';
 
 
 const filmTemplate = (film) => `
-        <article class="film-card">
+        <article class="film-card" id="${film.idFilm}">
           <a class="film-card__link">
             <h3 class="film-card__title">${film.title}</h3>
             <p class="film-card__rating">${film.rating}</p>
