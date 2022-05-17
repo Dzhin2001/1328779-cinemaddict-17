@@ -12,9 +12,9 @@ const siteMainElement = document.querySelector('.main');
 const siteFooterStatisticsElement = document.querySelector('.footer__statistics');
 
 const filmsModel = new FilmModel(generateFilms(FILMS_COUNT, COMMENTS_COUNT), generateComments(COMMENTS_COUNT));
-const filmsPresenter = new FilmsPresenter();
+const filmsPresenter = new FilmsPresenter(siteMainElement, filmsModel);
 
 render(new AvatarView(), siteHeaderElement);
 render(new StatisticsView(), siteFooterStatisticsElement);
 
-filmsPresenter.init(siteMainElement, filmsModel);
+filmsPresenter.init();

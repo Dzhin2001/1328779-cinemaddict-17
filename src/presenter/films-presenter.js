@@ -1,14 +1,16 @@
-import {render} from '../render.js';
+import {render, remove} from '../framework/render.js';
 import NavListView from '../view/nav-list-view';
 import SortListView from '../view/sort-list-view';
 import ButtonMoreView from '../view/button-more-view';
 import FilmView from '../view/film-view.js';
 import FilmsListView from '../view/films-list-view';
+import EmptyListView from '../view/empty-list-view';
 import PopupView from '../view/popupView';
 
 const FILM_COUNT_PER_STEP = 5;
 
 export default class FilmsPresenter {
+  #filmContainer = null;
   #filmsModel = null;
   #listFilms = null;
   #filmsListView = null;
@@ -17,23 +19,33 @@ export default class FilmsPresenter {
   #btnMoreView = null;
   #filmsContainer = null;
   #popupView = null;
-  #btnClosePopup = null;
   #renderedFilmCount = FILM_COUNT_PER_STEP;
 
-  init (siteMainElement, filmsModel) {
-
+  constructor(siteMainElement, filmsModel) {
+    this.#filmContainer = siteMainElement;
     this.#filmsModel = filmsModel;
+  }
+
+  init () {
     this.#listFilms = [...this.#filmsModel.films];
 
     this.#filmsListView = new FilmsListView();
-    this.#btnMoreView = new ButtonMoreView();
-
     this.#btnMoreElement = this.#filmsListView.element;
     this.#filmsContainer = this.#filmsListView.element.querySelector('.films-list__container');
+    this.#btnMoreView = new ButtonMoreView();
 
-    render(new NavListView(), siteMainElement);
-    render(new SortListView(), siteMainElement);
-    render(this.#filmsListView, siteMainElement);
+    render(new NavListView(), this.#filmContainer);
+    this.#renderFilmList();
+
+  }
+
+  #renderFilmList = () => {
+    if (this.#listFilms.length === 0) {
+      render(new EmptyListView(), this.#filmContainer);
+      return;
+    }
+    render(new SortListView(), this.#filmContainer);
+    render(this.#filmsListView, this.#filmContainer);
 
     for (let i=0; i <  Math.min(this.#listFilms.length, FILM_COUNT_PER_STEP); i++) {
       this.#renderFilm(this.#listFilms[i]);
@@ -41,14 +53,14 @@ export default class FilmsPresenter {
 
     if (this.#listFilms.length > FILM_COUNT_PER_STEP) {
       render(this.#btnMoreView, this.#btnMoreElement);
-      this.#btnMoreView.element.addEventListener('click',this.#onBtnMoreClick);
+      this.#btnMoreView.setClickHandler(this.#handleBtnMoreClick);
     }
-  }
+  };
 
   #renderFilm = (film) => {
     this.#filmsView = new FilmView(film);
     render(this.#filmsView, this.#filmsContainer);
-    this.#filmsView.element.addEventListener('click',this.#onPopupFilmClick);
+    this.#filmsView.setClickHandler(this.#popupOpen);
   };
 
   #popupOpen = (film) => {
@@ -56,8 +68,7 @@ export default class FilmsPresenter {
     render(this.#popupView, document.body);
     document.body.classList.add('hide-overflow');
     document.addEventListener('keydown', this.#onPopupEscKeyDown);
-    this.#btnClosePopup = this.#popupView.element.querySelector('.film-details__close-btn');
-    this.#btnClosePopup.addEventListener('click',this.#onPopupBtnCloseClick);
+    this.#popupView.setCloseClickHandler(this.#handlePopupBtnCloseClick);
   };
 
   #popupClose() {
@@ -66,12 +77,6 @@ export default class FilmsPresenter {
     this.#popupView.element.remove();
   }
 
-  #onPopupFilmClick = (evt) => {
-    const filmId = +evt.target.closest('article').id;
-    const film = this.#filmsModel.getFilm(filmId);
-    this.#popupOpen(film);
-  };
-
   #onPopupEscKeyDown = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
@@ -79,13 +84,11 @@ export default class FilmsPresenter {
     }
   };
 
-  #onPopupBtnCloseClick = () => {
+  #handlePopupBtnCloseClick = () => {
     this.#popupClose();
   };
 
-  #onBtnMoreClick = (evt) => {
-    evt.preventDefault();
-
+  #handleBtnMoreClick = () => {
     this.#listFilms
       .slice(this.#renderedFilmCount, this.#renderedFilmCount + FILM_COUNT_PER_STEP)
       .forEach((film) => this.#renderFilm(film));
@@ -93,8 +96,7 @@ export default class FilmsPresenter {
     this.#renderedFilmCount += FILM_COUNT_PER_STEP;
 
     if (this.#renderedFilmCount >= this.#listFilms.length) {
-      this.#btnMoreView.element.remove();
-      this.#btnMoreView.removeElement();
+      remove(this.#btnMoreView);
     }
   };
 
