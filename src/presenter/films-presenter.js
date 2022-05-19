@@ -2,50 +2,70 @@ import {render, remove} from '../framework/render.js';
 import NavListView from '../view/nav-list-view';
 import SortListView from '../view/sort-list-view';
 import ButtonMoreView from '../view/button-more-view';
-import FilmView from '../view/film-view.js';
-import FilmsListView from '../view/films-list-view';
+import FilmsView from '../view/films-view.js';
 import EmptyListView from '../view/empty-list-view';
+import FilmsTopView from '../view/films-top-view';
+import FilmsDiscussView from '../view/films-discuss-view';
+import FilmsListView from '../view/films-list-view';
+import FilmView from '../view/film-view.js';
 import PopupView from '../view/popupView';
 
 const FILM_COUNT_PER_STEP = 5;
 
 export default class FilmsPresenter {
-  #filmContainer = null;
   #filmsModel = null;
   #listFilms = null;
-  #filmsListView = null;
-  #filmsView = null;
-  #btnMoreElement = null;
-  #btnMoreView = null;
-  #filmsContainer = null;
-  #popupView = null;
   #renderedFilmCount = FILM_COUNT_PER_STEP;
 
+  #mainContainer = null;
+  #filmsListContainer = null;
+  #filmsContainer = null;
+  #btnMoreElement = null;
+
+  #navListView = null;
+  #sortListView = null;
+  #filmView = null;
+  #filmsListView = null;
+  #filmsTopView = null;
+  #filmsDiscussView = null;
+  #filmsView = null;
+  #btnMoreView = null;
+  #popupView = null;
+
   constructor(siteMainElement, filmsModel) {
-    this.#filmContainer = siteMainElement;
+    this.#mainContainer = siteMainElement;
     this.#filmsModel = filmsModel;
   }
 
   init () {
     this.#listFilms = [...this.#filmsModel.films];
 
+    this.#navListView = new NavListView(this.#listFilms);
+    this.#sortListView = new SortListView();
+    this.#filmsView = new FilmsView();
     this.#filmsListView = new FilmsListView();
-    this.#btnMoreElement = this.#filmsListView.element;
-    this.#filmsContainer = this.#filmsListView.element.querySelector('.films-list__container');
+    this.#filmsTopView = new FilmsTopView();
+    this.#filmsDiscussView = new FilmsDiscussView();
     this.#btnMoreView = new ButtonMoreView();
 
-    render(new NavListView(), this.#filmContainer);
+    this.#filmsListContainer = this.#filmsView.element;
+    this.#btnMoreElement = this.#filmsListView.element;
+    this.#filmsContainer = this.#filmsListView.element.querySelector('.films-list__container');
+
+    render(this.#navListView, this.#mainContainer);
     this.#renderFilmList();
 
   }
 
   #renderFilmList = () => {
     if (this.#listFilms.length === 0) {
-      render(new EmptyListView(), this.#filmContainer);
+      render(this.#filmsListView, this.#mainContainer);
+      render(new EmptyListView(), this.#filmsListContainer);
       return;
     }
-    render(new SortListView(), this.#filmContainer);
-    render(this.#filmsListView, this.#filmContainer);
+    render(this.#sortListView, this.#mainContainer);
+    render(this.#filmsView, this.#mainContainer);
+    render(this.#filmsListView, this.#filmsListContainer);
 
     for (let i=0; i <  Math.min(this.#listFilms.length, FILM_COUNT_PER_STEP); i++) {
       this.#renderFilm(this.#listFilms[i]);
@@ -55,12 +75,15 @@ export default class FilmsPresenter {
       render(this.#btnMoreView, this.#btnMoreElement);
       this.#btnMoreView.setClickHandler(this.#handleBtnMoreClick);
     }
+
+    render(this.#filmsTopView, this.#filmsListContainer);
+    render(this.#filmsDiscussView, this.#filmsListContainer);
   };
 
   #renderFilm = (film) => {
-    this.#filmsView = new FilmView(film);
-    render(this.#filmsView, this.#filmsContainer);
-    this.#filmsView.setClickHandler(this.#popupOpen);
+    this.#filmView = new FilmView(film);
+    render(this.#filmView, this.#filmsContainer);
+    this.#filmView.setClickHandler(this.#popupOpen);
   };
 
   #popupOpen = (film) => {

@@ -14,5 +14,6 @@ const getRandomDate = (dateFrom = dayjs('1900','YYYY'), dateTo = dayjs()) => (
 );
 
 const getRandomPosNeg = () => (Math.random() - 0.5);
+const getRandomBoolean = () => (getRandomPosNeg() < 0);
 
-export {getRandomInteger, getRandomArrayElement, getRandomPosNeg, getRandomDate};
+export {getRandomInteger, getRandomArrayElement, getRandomPosNeg, getRandomDate, getRandomBoolean};

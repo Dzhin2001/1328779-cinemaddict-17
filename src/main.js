@@ -1,4 +1,4 @@
-import {render} from './render.js';
+import {render} from './framework/render.js';
 import AvatarView from './view/avatar-view.js';
 import StatisticsView from './view/statistics-view.js';
 import FilmsPresenter from './presenter/films-presenter';

@@ -16,10 +16,10 @@ export default class FilmModel {
   }
 
   getFilm(id) {
-    return this.#films.find( (film) => film.idFilm === id);
+    return this.#films.find( (film) => film.id === id);
   }
 
   getComments(film) {
-    return [...film.comments].map((id) => this.#comments.find( (comment) => comment.idComment === id));
+    return [...film.comments].map((id) => this.#comments.find( (comment) => comment.id === id));
   }
 }

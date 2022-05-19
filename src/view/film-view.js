@@ -1,16 +1,18 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
+const popupNames = (names) => names.join(', ');
+
 const filmTemplate = (film) => `
         <article class="film-card">
           <a class="film-card__link">
             <h3 class="film-card__title">${film.title}</h3>
-            <p class="film-card__rating">${film.rating}</p>
+            <p class="film-card__rating">${film.totalRating}</p>
             <p class="film-card__info">
-              <span class="film-card__year">${film.releaseDate.getFullYear()}</span>
-              <span class="film-card__duration">${film.duration}</span>
-              <span class="film-card__genre">${film.genres.join(', ')}</span>
+              <span class="film-card__year">${film.release.date.getFullYear()}</span>
+              <span class="film-card__duration">${film.runtime}</span>
+              <span class="film-card__genre">${popupNames(film.genre)}</span>
             </p>
-            <img src="${film.cover}" alt="" class="film-card__poster">
+            <img src="${film.poster}" alt="" class="film-card__poster">
             <p class="film-card__description">${film.description}</p>
             <span class="film-card__comments">${film.comments.length} comments</span>
           </a>

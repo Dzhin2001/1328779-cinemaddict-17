@@ -1,4 +1,4 @@
-import {getRandomArrayElement, getRandomInteger, getRandomPosNeg, getRandomDate} from '../utils.js';
+import {getRandomArrayElement, getRandomInteger, getRandomPosNeg, getRandomDate, getRandomBoolean} from '../utils.js';
 import dayjs  from 'dayjs';
 
 const DESCRIPTION_COUNT = {
@@ -12,6 +12,11 @@ const COMMENT_COUNT = {
 };
 
 const GENRES_COUNT = {
+  min: 1,
+  max: 3
+};
+
+const NAMES_COUNT = {
   min: 1,
   max: 3
 };
@@ -136,6 +141,13 @@ const generateGenres = () => {
     .slice(0, getRandomInteger(min, max));
 };
 
+const generateNames = () => {
+  const {min, max} = NAMES_COUNT;
+  return [...NAMES]
+    .sort(() => (getRandomPosNeg()))
+    .slice(0, getRandomInteger(min, max));
+};
+
 const getDuration = (minutes) => {
   const duration = {
     hours : Math.round(minutes/60),
@@ -145,22 +157,29 @@ const getDuration = (minutes) => {
 };
 
 const generateFilm = (commentsCount) => ({
-  idFilm: getIdFilm(),
-  title: getRandomArrayElement(TITLES),
-  originalTitle: getRandomArrayElement(TITLES),
-  cover: `./images/posters/${getRandomArrayElement(COVERS)}`,
-  rating: getRandomInteger(1, 100)/10,
-  director: getRandomArrayElement(NAMES),
-  writer: getRandomArrayElement(NAMES),
-  cast: getRandomArrayElement(NAMES),
-  releaseDate: getRandomDate(dayjs('1930','YYYY')),
-  duration:  getDuration(getRandomInteger(1, 8)*15),
-  country: getRandomArrayElement(COUNTRIES),
-  genres: generateGenres(),
-  description: generateDescription(),
-  fullDescription: generateDescription(),
-  ageRating: getRandomInteger(0, 18),
+  id: getIdFilm(),
   comments: generateComments(commentsCount),
+  title: getRandomArrayElement(TITLES),
+  alternativeTitle: getRandomArrayElement(TITLES),
+  totalRating: getRandomInteger(1, 100)/10,
+  poster: `./images/posters/${getRandomArrayElement(COVERS)}`,
+  ageRating: getRandomInteger(0, 18),
+  director: getRandomArrayElement(NAMES),
+  writers: generateNames(),
+  actors: generateNames(),
+  release: {
+    date: getRandomDate(dayjs('1930','YYYY')),
+    releaseCountry: getRandomArrayElement(COUNTRIES),
+  },
+  runtime:  getDuration(getRandomInteger(1, 8)*15),
+  genre: generateGenres(),
+  description: generateDescription(),
+  userDetails: {
+    watchlist: getRandomBoolean(),
+    alreadyWatched: getRandomBoolean(),
+    watchingDate: getRandomDate(dayjs().subtract(12, 'month')),
+    favorite: getRandomBoolean(),
+  },
 });
 
 const generateFilms = (filmsCount, commentsCount) => Array.from({length: filmsCount}, () => generateFilm(commentsCount) );

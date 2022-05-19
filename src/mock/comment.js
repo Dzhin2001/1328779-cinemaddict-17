@@ -1,4 +1,5 @@
 import {getRandomArrayElement, getRandomDate} from '../utils.js';
+import {EMOTIONS} from '../const.js';
 import dayjs  from 'dayjs';
 
 const NAMES = [
@@ -31,10 +32,11 @@ const getIdComment = () => ++idComment;
 
 
 const generateComment = () => ({
-  idComment: getIdComment(),
-  comment: getRandomArrayElement(COMMENTS),
+  id: getIdComment(),
   author: getRandomArrayElement(NAMES),
-  datetime: getRandomDate(dayjs().subtract(6, 'month'))
+  comment: getRandomArrayElement(COMMENTS),
+  date: getRandomDate(dayjs().subtract(6, 'month')),
+  emotion: getRandomArrayElement(EMOTIONS),
 });
 
 export const generateComments = (commentsCount) => Array.from({length: commentsCount}, generateComment );
