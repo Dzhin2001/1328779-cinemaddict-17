@@ -20,60 +20,56 @@ export default class FilmPresenter {
   constructor(filmsContainer, changeData, changeMode ) {
     this.#filmsContainer = filmsContainer;
     this.#changeData = changeData;
-    this.#changeMode  = changeMode ;
+    this.#changeMode = changeMode ;
   }
 
   init (film, comments) {
 
-    const prevFilmView = this.#filmView;
-    const prevPopupView = this.#popupView;
-
     this.#film = film;
     this.#comments = comments;
-    this.#filmView = new FilmView(film);
-    this.#popupView = new PopupView(film, this.#comments);
+
+    const prevFilmView = this.#filmView;
+    this.#filmView = new FilmView(this.#film);
     this.#filmView.setClickHandler(this.#popupOpen);
     this.#filmView.setWatchlistClickHandler(this.#handleWatchClick);
     this.#filmView.setWatchedClickHandler(this.#handleWatchedClick);
     this.#filmView.setFavoritesClickHandler(this.#handleFavoritesClick);
 
-    if (prevFilmView === null) {
+    const prevPopupView = this.#popupView;
+    this.#popupView = new PopupView(this.#film, this.#comments);
+    this.#popupView.setCloseClickHandler(this.#handlePopupBtnCloseClick);
+    this.#popupView.setWatchlistClickHandler(this.#handleWatchClick);
+    this.#popupView.setWatchedClickHandler(this.#handleWatchedClick);
+    this.#popupView.setFavoritesClickHandler(this.#handleFavoritesClick);
+
+    if (!prevFilmView) {
       render(this.#filmView, this.#filmsContainer);
       return;
     }
     replace(this.#filmView, prevFilmView);
     remove(prevFilmView);
 
-    this.#renderPopup(prevPopupView);
-  }
-
-
-  #renderPopup = (prevPopupView) => {
-    if (prevPopupView === null || prevPopupView === undefined) {
-      render(this.#popupView, document.body);
-      document.body.classList.add('hide-overflow');
-    } else {
+    if (this.#mode === Mode.POPUP) {
       replace(this.#popupView, prevPopupView);
       remove(prevPopupView);
     }
-    document.addEventListener('keydown', this.#onPopupEscKeyDown);
-    this.#popupView.setCloseClickHandler(this.#handlePopupBtnCloseClick);
-    this.#popupView.setWatchlistClickHandler(this.#handleWatchClick);
-    this.#popupView.setWatchedClickHandler(this.#handleWatchedClick);
-    this.#popupView.setFavoritesClickHandler(this.#handleFavoritesClick);
-  };
+  }
 
   #popupOpen = () => {
     this.#changeMode();
-    this.#renderPopup();
     this.#mode = Mode.POPUP;
+    render(this.#popupView, document.body);
+    document.body.classList.add('hide-overflow');
+    document.addEventListener('keydown', this.#onPopupEscKeyDown);
   };
 
   popupClose() {
-    document.removeEventListener('keydown', this.#onPopupEscKeyDown);
-    document.body.classList.remove('hide-overflow');
-    this.#popupView.element.remove();
-    this.#mode = Mode.DEFAULT;
+    if (this.#mode === Mode.POPUP) {
+      document.removeEventListener('keydown', this.#onPopupEscKeyDown);
+      document.body.classList.remove('hide-overflow');
+      this.#popupView.element.remove();
+      this.#mode = Mode.DEFAULT;
+    }
   }
 
   #onPopupEscKeyDown = (evt) => {
@@ -91,10 +87,8 @@ export default class FilmPresenter {
     this.#changeData({
       ...this.#film,
       userDetails:{
+        ...this.#film.userDetails,
         watchlist: !this.#film.userDetails.watchlist,
-        alreadyWatched: this.#film.userDetails.alreadyWatched,
-        watchingDate: this.#film.userDetails.watchingDate,
-        favorite: this.#film.userDetails.favorite,
       }
     });
   };
@@ -103,10 +97,8 @@ export default class FilmPresenter {
     this.#changeData({
       ...this.#film,
       userDetails:{
-        watchlist: this.#film.userDetails.watchlist,
+        ...this.#film.userDetails,
         alreadyWatched: !this.#film.userDetails.alreadyWatched,
-        watchingDate: this.#film.userDetails.watchingDate,
-        favorite: this.#film.userDetails.favorite,
       }
     });
   };
@@ -115,11 +107,16 @@ export default class FilmPresenter {
     this.#changeData({
       ...this.#film,
       userDetails:{
-        watchlist: this.#film.userDetails.watchlist,
-        alreadyWatched: this.#film.userDetails.alreadyWatched,
-        watchingDate: this.#film.userDetails.watchingDate,
+        ...this.#film.userDetails,
         favorite: !this.#film.userDetails.favorite,
       }
     });
+  };
+
+  destroy = () => {
+    remove(this.#filmView);
+    if (this.#mode === Mode.POPUP) {
+      remove(this.#popupView);
+    }
   };
 }
