@@ -16,6 +16,7 @@ export default class SortListView extends AbstractView {
     super();
     this.#sortType = sortType;
   }
+
   get template() {
     return sortListTemplate(this.#sortType);
   }
