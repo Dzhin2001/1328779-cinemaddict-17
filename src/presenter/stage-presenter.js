@@ -40,7 +40,7 @@ export default class StagePresenter {
   #filmsDiscussView = null;
   #stageView = null;
   #btnMoreView = null;
-  #filmListSortType = SortType.DEFAULT;
+  #filmListSortType = SortType.DATE_UP;
 
   constructor(siteMainElement, filmsModel) {
     this.#mainContainer = siteMainElement;
@@ -54,7 +54,7 @@ export default class StagePresenter {
     this.#discussListFilms = [...this.#filmsModel.mostCommentedFilms()];
 
     this.#navListView = new NavListView(this.#listFilms);
-    this.#sortListView = new SortListView();
+    this.#sortListView = new SortListView(this.#filmListSortType);
     this.#stageView = new StageView();
     this.#emptyListView = new EmptyListView();
     this.#filmsListView = new FilmsListView();
