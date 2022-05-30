@@ -1,26 +1,33 @@
 import {render, remove, RenderPosition} from '../framework/render.js';
 import {updateItem} from '../utils.js';
-import dayjs  from 'dayjs';
-import {SortType} from '../const.js';
-import NavListView from '../view/nav-list-view';
-import SortListView from '../view/sort-list-view';
-import ButtonMoreView from '../view/button-more-view';
+import {SortFilm, SortType} from '../sort/sort-film.js';
+import NavListView from '../view/nav-list-view.js';
+import SortListView from '../view/sort-list-view.js';
+import ButtonMoreView from '../view/button-more-view.js';
 import StageView from '../view/stage-view.js';
-import EmptyListView from '../view/empty-list-view';
-import FilmsTopView from '../view/films-top-view';
-import FilmsDiscussView from '../view/films-discuss-view';
-import FilmsListView from '../view/films-list-view';
+import EmptyListView from '../view/empty-list-view.js';
+import FilmsTopView from '../view/films-top-view.js';
+import FilmsDiscussView from '../view/films-discuss-view.js';
+import FilmsListView from '../view/films-list-view.js';
 import FilmPresenter from '../presenter/film-presenter.js';
 
 const FILM_COUNT_PER_STEP = 5;
+const TOP_RATED_COUNT = 2;
+const MOST_COMMENTED_COUNT = 2;
+const PresenterType = {
+  MAIN: 'main',
+  TOP: 'top',
+  DISCUSS: 'discuss',
+};
 
 export default class StagePresenter {
   #filmsModel = null;
+  #sortFilm = null;
   #listFilms = [];
-  #topListFilms = null;
-  #discussListFilms = null;
-  #sourcedListFilms = [];
+  #topListFilms = [];
+  #discussListFilms = [];
   #renderedFilmCount = FILM_COUNT_PER_STEP;
+  #filmListSortType = SortType.DEFAULT;
 
   #filmPresenter = new Map();
 
@@ -29,7 +36,6 @@ export default class StagePresenter {
   #filmsContainer = null;
   #topFilmsContainer = null;
   #discussFilmsContainer = null;
-
   #btnMoreElement = null;
 
   #navListView = null;
@@ -40,7 +46,6 @@ export default class StagePresenter {
   #filmsDiscussView = null;
   #stageView = null;
   #btnMoreView = null;
-  #filmListSortType = SortType.DATE_UP;
 
   constructor(siteMainElement, filmsModel) {
     this.#mainContainer = siteMainElement;
@@ -49,12 +54,12 @@ export default class StagePresenter {
 
   init () {
     this.#listFilms = [...this.#filmsModel.films];
-    this.#sourcedListFilms = [...this.#filmsModel.films];
-    this.#topListFilms = [...this.#filmsModel.topRatedFilms()];
-    this.#discussListFilms = [...this.#filmsModel.mostCommentedFilms()];
+    this.#sortFilm = new SortFilm(this.#listFilms);
+    this.#topListFilms = this.#sortFilm.getSortedFilmList(SortType.RATING_UP).slice(0,TOP_RATED_COUNT);
+    this.#discussListFilms = this.#sortFilm.getSortedFilmList(SortType.COMMENTS_UP).slice(0,MOST_COMMENTED_COUNT);
 
     this.#navListView = new NavListView(this.#listFilms);
-    this.#sortListView = new SortListView(this.#filmListSortType);
+    this.#sortListView = new SortListView();
     this.#stageView = new StageView();
     this.#emptyListView = new EmptyListView();
     this.#filmsListView = new FilmsListView();
@@ -81,58 +86,13 @@ export default class StagePresenter {
     this.#sortListView.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 
-  #sortByDateUp = (film1, film2) => {
-    const date1 = dayjs(film1.release.date);
-    const date2 = dayjs(film2.release.date);
-    if (date1.isBefore(date2)) {
-      return 1;
-    } else if (date1.isAfter(date2)) {
-      return -1;
-    } else {
-      return 0;
-    }
-  };
-
-  #sortByDateDown = (film1, film2) => ((-1) * this.#sortByDateUp(film1, film2));
-
-  #sortByRatingUp = (film1, film2) => {
-    if (film1.totalRating < film2.totalRating) {
-      return 1;
-    } else if (film1.totalRating > film2.totalRating) {
-      return -1;
-    } else {
-      return 0;
-    }
-  };
-
-  #sortByRatingDown = (film1, film2) => ((-1) * this.#sortByRatingUp(film1, film2));
-
-  #setSortType = (sortType) => {
-    if (sortType === SortType.DATE_UP && this.#filmListSortType === SortType.DATE_UP) {
+  #setSortType = (newSortType) => {
+    if (newSortType === SortType.DATE_UP && this.#filmListSortType === SortType.DATE_UP) {
       this.#filmListSortType = SortType.DATE_DOWN;
-    } else if (sortType === SortType.RATING_UP && this.#filmListSortType === SortType.RATING_UP) {
+    } else if (newSortType === SortType.RATING_UP && this.#filmListSortType === SortType.RATING_UP) {
       this.#filmListSortType = SortType.RATING_DOWN;
     } else {
-      this.#filmListSortType = sortType;
-    }
-  };
-
-  #sortFilmList = () => {
-    switch (this.#filmListSortType) {
-      case SortType.DATE_UP:
-        this.#listFilms = [...this.#sourcedListFilms].sort(this.#sortByDateUp);
-        break;
-      case SortType.DATE_DOWN:
-        this.#listFilms = [...this.#sourcedListFilms].sort(this.#sortByDateDown);
-        break;
-      case SortType.RATING_UP:
-        this.#listFilms = [...this.#sourcedListFilms].sort(this.#sortByRatingUp);
-        break;
-      case SortType.RATING_DOWN:
-        this.#listFilms = [...this.#sourcedListFilms].sort(this.#sortByRatingDown);
-        break;
-      default:
-        this.#listFilms = [...this.#sourcedListFilms];
+      this.#filmListSortType = newSortType;
     }
   };
 
@@ -142,7 +102,7 @@ export default class StagePresenter {
     if (this.#filmListSortType === prevSortType) {
       return;
     }
-    this.#sortFilmList();
+    this.#listFilms = this.#sortFilm.getSortedFilmList(this.#filmListSortType);
     this.#clearFilmList();
     this.#renderFilmList();
   };
@@ -166,21 +126,14 @@ export default class StagePresenter {
     this.#renderDiscussFilmList();
   };
 
-
   #renderEmptyList = () => {
     render(this.#emptyListView, this.#filmsListContainer);
   };
 
-  #getFilmKey = (film) => (`${film.id}`);
-
-  #getTopFilmKey = (film) => (`top-${film.id}`);
-
-  #getDiscussFilmKey = (film) => (`discuss-${film.id}`);
-
   #renderFilms = (from, to) => {
     this.#listFilms
       .slice(from, to)
-      .forEach((film) => this.#renderFilm(film, this.#filmsContainer, this.#getFilmKey));
+      .forEach((film) => this.#renderFilm(film, this.#filmsContainer, PresenterType.MAIN));
   };
 
   #renderFilmList = () => {
@@ -192,26 +145,26 @@ export default class StagePresenter {
   };
 
   #clearFilmList = () => {
-    this.#listFilms
-      .forEach((film) => {
-        const key = this.#getFilmKey(film);
-        const presenter = this.#filmPresenter.get(key);
-        if (presenter) {
+    this.#filmPresenter.forEach(
+      (presenters) => {
+        const presenter = presenters.get(PresenterType.MAIN);
+        if (presenter !== undefined) {
           presenter.destroy();
-          this.#filmPresenter.delete(key);
         }
-      });
+        presenters.delete(PresenterType.MAIN);
+      }
+    );
     remove(this.#btnMoreView);
   };
 
   #renderTopFilmList= () => {
     render(this.#filmsTopView, this.#filmsListContainer);
-    this.#topListFilms.forEach((film) => this.#renderFilm(film, this.#topFilmsContainer, this.#getTopFilmKey));
+    this.#topListFilms.forEach((film) => this.#renderFilm(film, this.#topFilmsContainer, PresenterType.TOP));
   };
 
   #renderDiscussFilmList = () => {
     render(this.#filmsDiscussView, this.#filmsListContainer);
-    this.#discussListFilms.forEach((film) => this.#renderFilm(film, this.#discussFilmsContainer, this.#getDiscussFilmKey));
+    this.#discussListFilms.forEach((film) => this.#renderFilm(film, this.#discussFilmsContainer, PresenterType.DISCUSS));
   };
 
   #handleBtnMoreClick = () => {
@@ -222,33 +175,33 @@ export default class StagePresenter {
     }
   };
 
-  #renderFilm = (film, container, getKey) => {
-    const filmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handleModeChange);
-    filmPresenter.init(film, this.#filmsModel.getComments(film));
-    this.#filmPresenter.set(getKey(film), filmPresenter);
+  #renderFilm = (film, container, key) => {
+    const newFilmPresenter = new FilmPresenter(container, this.#handleFilmChange, this.#handleModeChange);
+    newFilmPresenter.init(film, this.#filmsModel.getComments(film));
+    let presenters = this.#filmPresenter.get(film.id);
+    if (presenters === undefined) {
+      presenters = new Map();
+    }
+    presenters.set(key, newFilmPresenter);
+    this.#filmPresenter.set(film.id, presenters);
   };
 
   #handleModeChange = () => {
-    this.#filmPresenter.forEach((presenter) => presenter.popupClose());
-  };
-
-  #initPresenterByKey = (key, updatedFilm) => {
-    const presenter = this.#filmPresenter.get(key);
-    if (presenter) {
-      presenter.init(updatedFilm, this.#filmsModel.getComments(updatedFilm));
-    }
+    this.#filmPresenter
+      .forEach(
+        (presenters) => presenters.forEach((presenter) => presenter.popupClose())
+      );
   };
 
   #handleFilmChange = (updatedFilm) => {
-
     this.#listFilms = updateItem(this.#listFilms, updatedFilm);
-    this.#sourcedListFilms = updateItem(this.#sourcedListFilms, updatedFilm);
-    this.#initPresenterByKey(this.#getFilmKey(updatedFilm), updatedFilm);
-
+    this.#sortFilm.filmList = updateItem(this.#sortFilm.filmList, updatedFilm);
     this.#topListFilms = updateItem(this.#topListFilms, updatedFilm);
-    this.#initPresenterByKey(this.#getTopFilmKey(updatedFilm), updatedFilm);
-
     this.#discussListFilms = updateItem(this.#discussListFilms, updatedFilm);
-    this.#initPresenterByKey(this.#getDiscussFilmKey(updatedFilm), updatedFilm);
+    this.#filmPresenter
+      .get(updatedFilm.id)
+      .forEach(
+        (presenter) => presenter.init(updatedFilm, this.#filmsModel.getComments(updatedFilm))
+      );
   };
 }
