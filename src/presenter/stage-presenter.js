@@ -1,5 +1,5 @@
 import {render, remove, RenderPosition} from '../framework/render.js';
-import {getRandomArrayElement, getRandomDate, updateItem} from '../utils.js';
+import {updateItem} from '../utils.js';
 import {SortFilm, SortType} from '../sort/sort-film.js';
 import NavListView from '../view/nav-list-view.js';
 import SortListView from '../view/sort-list-view.js';
