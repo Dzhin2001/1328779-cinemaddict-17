@@ -39,4 +39,6 @@ const generateComment = () => ({
   emotion: getRandomArrayElement(EMOTIONS),
 });
 
-export const generateComments = (commentsCount) => Array.from({length: commentsCount}, generateComment );
+const generateComments = (commentsCount) => Array.from({length: commentsCount}, generateComment );
+
+export {generateComments, getIdComment};

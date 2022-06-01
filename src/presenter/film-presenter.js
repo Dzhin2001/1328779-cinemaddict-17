@@ -41,6 +41,7 @@ export default class FilmPresenter {
     this.#popupView.setWatchlistClickHandler(this.#handleWatchClick);
     this.#popupView.setWatchedClickHandler(this.#handleWatchedClick);
     this.#popupView.setFavoritesClickHandler(this.#handleFavoritesClick);
+    this.#popupView.setFormSubmitHandler(this.#handleFormSubmit);
 
     if (!prevFilmView) {
       render(this.#filmView, this.#filmsContainer);
@@ -61,16 +62,25 @@ export default class FilmPresenter {
     render(this.#popupView, document.body);
     document.body.classList.add('hide-overflow');
     document.addEventListener('keydown', this.#onPopupEscKeyDown);
+    document.addEventListener('keydown', this.#onCtrlEnterDown);
   };
 
   popupClose() {
     if (this.#mode === Mode.POPUP) {
       document.removeEventListener('keydown', this.#onPopupEscKeyDown);
+      document.removeEventListener('keydown', this.#onCtrlEnterDown);
       document.body.classList.remove('hide-overflow');
       this.#popupView.element.remove();
       this.#mode = Mode.DEFAULT;
     }
   }
+
+  #onCtrlEnterDown = (evt) => {
+    if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)) {
+      evt.preventDefault();
+      this.#popupView.popupFormSubmit();
+    }
+  };
 
   #onPopupEscKeyDown = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
@@ -111,6 +121,10 @@ export default class FilmPresenter {
         favorite: !this.#film.userDetails.favorite,
       }
     });
+  };
+
+  #handleFormSubmit = ({film, newComment}) => {
+    this.#changeData(film, newComment);
   };
 
   destroy = () => {

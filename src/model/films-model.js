@@ -12,6 +12,10 @@ export default class FilmModel {
     return this.#comments;
   }
 
+  set comments(comment) {
+    this.#comments.push(comment);
+  }
+
   get films() {
     return this.#films;
   }

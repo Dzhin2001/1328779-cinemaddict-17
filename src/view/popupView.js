@@ -1,7 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import dayjs  from 'dayjs';
 
-
 const dateComment = (date) => {
   const dayjs1 = dayjs(date);
   const days =  Math.abs(dayjs().diff(dayjs1,'day'));
@@ -32,7 +31,7 @@ const popupNewComment = (comment, emotion) => `
           </div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" value="${comment ? comment : ''}"></textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? comment : ''}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
@@ -126,7 +125,7 @@ const popupTemplate = (_state) => `
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${dayjs(_state.release.date).format('MM/DD/YYYY')}</td>
+              <td class="film-details__cell">${dayjs(_state.release.date).format('DD MMM YYYY')}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
@@ -188,10 +187,22 @@ export default class PopupView extends AbstractStatefulView {
     });
 
   static parseStateToFilm = (state) => {
-    const film = {...state};
-    const comments = film.comments;
-    delete film.comments;
-    return [film, comments];
+    // возвращаем к первоначальному формату
+    // массив id комментариев
+    const comments = state.comments.map((e) => e.id);
+    const film = {...state, comments};
+    delete film.newComment;
+    delete film.newEmotion;
+    // новый комментарий если есть
+    let newComment = null;
+    if ((state.newComment || '').length > 0 && state.newEmotion) {
+      newComment = {
+        comment: state.newComment,
+        date: new Date(),
+        emotion: state.newEmotion,
+      };
+    }
+    return {film, newComment};
   };
 
   get template() {
@@ -203,6 +214,7 @@ export default class PopupView extends AbstractStatefulView {
     this.setWatchlistClickHandler(this._callback.watchlistClick);
     this.setWatchedClickHandler(this._callback.watchedClick);
     this.setFavoritesClickHandler(this._callback.favoritesClick);
+    this.setFormSubmitHandler(this._callback.formSubmit);
     this.#setInnerHandlers();
     this.element.scrollTop = this.#prevScrollTop;
   };
@@ -213,7 +225,7 @@ export default class PopupView extends AbstractStatefulView {
       .forEach((e) => e.addEventListener('click', this.#emojiItemHandler));
     this.element
       .querySelector('.film-details__comment-input')
-      .addEventListener('onchange', this.#commentInputHandler);
+      .addEventListener('input', this.#commentInputHandler);
   };
 
   setCloseClickHandler = (callback) => {
@@ -271,9 +283,19 @@ export default class PopupView extends AbstractStatefulView {
 
   #commentInputHandler = (evt) => {
     evt.preventDefault();
-    this.#prevScrollTop = this.element.scrollTop;
-    this.updateElement({
+    this._setState({
       newComment: evt.target.value
     });
   };
+
+  popupFormSubmit = () => {
+    this._callback.formSubmit(
+      PopupView.parseStateToFilm(this._state)
+    );
+  };
+
+  setFormSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+  };
+
 }

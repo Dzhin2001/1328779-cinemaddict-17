@@ -1,5 +1,5 @@
 import {render, remove, RenderPosition} from '../framework/render.js';
-import {updateItem} from '../utils.js';
+import {getRandomArrayElement, getRandomDate, updateItem} from '../utils.js';
 import {SortFilm, SortType} from '../sort/sort-film.js';
 import NavListView from '../view/nav-list-view.js';
 import SortListView from '../view/sort-list-view.js';
@@ -10,6 +10,7 @@ import FilmsTopView from '../view/films-top-view.js';
 import FilmsDiscussView from '../view/films-discuss-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmPresenter from '../presenter/film-presenter.js';
+import {getIdComment} from '../mock/comment.js';
 
 const FILM_COUNT_PER_STEP = 5;
 const TOP_RATED_COUNT = 2;
@@ -193,7 +194,17 @@ export default class StagePresenter {
       );
   };
 
-  #handleFilmChange = (updatedFilm) => {
+  #handleFilmChange = (updatedFilm, newComment) => {
+    // добавляем новый комментарий (пока в этом месте)
+    if (newComment) {
+      const comment = {
+        id: getIdComment(),
+        author: 'You',
+        ...newComment,
+      };
+      this.#filmsModel.comments = comment;
+      updatedFilm.comments.push(comment.id);
+    }
     this.#listFilms = updateItem(this.#listFilms, updatedFilm);
     this.#sortFilm.filmList = updateItem(this.#sortFilm.filmList, updatedFilm);
     this.#topListFilms = updateItem(this.#topListFilms, updatedFilm);
