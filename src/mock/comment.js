@@ -1,4 +1,4 @@
-import {getRandomArrayElement, getRandomDate} from '../utils.js';
+import {getRandomArrayElement, getRandomDate} from '../utils/random.js';
 import {EMOTIONS} from '../const.js';
 import dayjs  from 'dayjs';
 

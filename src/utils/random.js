@@ -14,18 +14,13 @@ const getRandomDate = (dateFrom = dayjs('1900','YYYY'), dateTo = dayjs()) => (
 );
 
 const getRandomPosNeg = () => (Math.random() - 0.5);
+
 const getRandomBoolean = () => (Math.random()  < 0.5);
 
-const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-  if (index === -1) {
-    return items;
-  }
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
+export {
+  getRandomInteger,
+  getRandomArrayElement,
+  getRandomPosNeg,
+  getRandomDate,
+  getRandomBoolean,
 };
-
-export {getRandomInteger, getRandomArrayElement, getRandomPosNeg, getRandomDate, getRandomBoolean, updateItem};

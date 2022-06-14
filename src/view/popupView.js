@@ -1,5 +1,6 @@
-import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import he from 'he';
 import dayjs  from 'dayjs';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 const dateComment = (date) => {
   const dayjs1 = dayjs(date);
@@ -64,7 +65,7 @@ const popupComment = (comment) => `
               <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
             </span>
             <div>
-              <p class="film-details__comment-text">${comment.comment}</p>
+              <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
               <p class="film-details__comment-info">
                 <span class="film-details__comment-author">${comment.author}</span>
                 <span class="film-details__comment-day">${dateComment(comment.date)}</span>
@@ -170,11 +171,11 @@ const popupTemplate = (_state) => `
 export default class PopupView extends AbstractStatefulView {
   _state = null;
   #btnClosePopup = null;
-  #prevScrollTop = 0;
 
-  constructor(film, comments) {
+  constructor(film, comments, prevScrollTop) {
     super();
     this._state = PopupView.parseFilmToState(film, comments);
+    this.prevScrollTop = prevScrollTop;
     this.#setInnerHandlers();
   }
 
@@ -216,7 +217,7 @@ export default class PopupView extends AbstractStatefulView {
     this.setFavoritesClickHandler(this._callback.favoritesClick);
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.#setInnerHandlers();
-    this.element.scrollTop = this.#prevScrollTop;
+    this.restoreScroll();
   };
 
   #setInnerHandlers = () => {
@@ -226,6 +227,9 @@ export default class PopupView extends AbstractStatefulView {
     this.element
       .querySelector('.film-details__comment-input')
       .addEventListener('input', this.#commentInputHandler);
+    this.element
+      .querySelector('.film-details__comment-input')
+      .addEventListener('keydown', this.#onCtrlEnterDown);
   };
 
   setCloseClickHandler = (callback) => {
@@ -246,8 +250,10 @@ export default class PopupView extends AbstractStatefulView {
 
   #watchlistClickHandler = (evt) => {
     evt.preventDefault();
-    this.#prevScrollTop = this.element.scrollTop;
+    this.prevScrollTop = this.element.scrollTop;
     this._callback.watchlistClick();
+
+    //console.log(`${this._state.userDetails.watchlist} - ${this._state.userDetails.alreadyWatched} - ${this._state.userDetails.favorite}`);
   };
 
   setWatchedClickHandler = (callback) => {
@@ -257,8 +263,10 @@ export default class PopupView extends AbstractStatefulView {
 
   #watchedClickHandler = (evt) => {
     evt.preventDefault();
-    this.#prevScrollTop = this.element.scrollTop;
+    this.prevScrollTop = this.element.scrollTop;
     this._callback.watchedClick();
+
+    //console.log(`${this._state.userDetails.watchlist} - ${this._state.userDetails.alreadyWatched} - ${this._state.userDetails.favorite}`);
   };
 
   setFavoritesClickHandler = (callback) => {
@@ -268,14 +276,16 @@ export default class PopupView extends AbstractStatefulView {
 
   #favoritesClickHandler = (evt) => {
     evt.preventDefault();
-    this.#prevScrollTop = this.element.scrollTop;
+    this.prevScrollTop = this.element.scrollTop;
     this._callback.favoritesClick();
+
+    //console.log(`${this._state.userDetails.watchlist} - ${this._state.userDetails.alreadyWatched} - ${this._state.userDetails.favorite}`);
   };
 
 
   #emojiItemHandler = (evt) => {
     evt.preventDefault();
-    this.#prevScrollTop = this.element.scrollTop;
+    this.prevScrollTop = this.element.scrollTop;
     this.updateElement({
       newEmotion: evt.target.value
     });
@@ -288,14 +298,22 @@ export default class PopupView extends AbstractStatefulView {
     });
   };
 
-  popupFormSubmit = () => {
-    this._callback.formSubmit(
-      PopupView.parseStateToFilm(this._state)
-    );
-  };
-
   setFormSubmitHandler = (callback) => {
     this._callback.formSubmit = callback;
+  };
+
+  #onCtrlEnterDown = (evt) => {
+    if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)) {
+      evt.preventDefault();
+      this.prevScrollTop = this.element.scrollTop;
+      this._callback.formSubmit(
+        PopupView.parseStateToFilm(this._state)
+      );
+    }
+  };
+
+  restoreScroll = () => {
+    this.element.scrollTop = this.prevScrollTop;
   };
 
 }

@@ -1,4 +1,4 @@
-import {getRandomArrayElement, getRandomInteger, getRandomPosNeg, getRandomDate, getRandomBoolean} from '../utils.js';
+import {getRandomArrayElement, getRandomInteger, getRandomPosNeg, getRandomDate, getRandomBoolean} from '../utils/random.js';
 import dayjs  from 'dayjs';
 
 const DESCRIPTION_COUNT = {
