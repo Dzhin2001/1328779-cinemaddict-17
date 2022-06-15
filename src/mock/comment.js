@@ -41,4 +41,4 @@ const generateComment = () => ({
 
 const generateComments = (commentsCount) => Array.from({length: commentsCount}, generateComment );
 
-export {generateComments, getIdComment};
+export {generateComments, generateComment, getIdComment};

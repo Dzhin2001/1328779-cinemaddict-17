@@ -233,13 +233,13 @@ export default class StagePresenter {
         this.#filmsModel.deleteFilm(updateType, update);
         break;
       case UserAction.UPDATE_COMMENT:
-        this.#commentsModel.updateComment(updateType, update);
+        this.#commentsModel.updateComment(update);
         break;
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, update);
+        this.#commentsModel.addComment(update);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, update);
+        this.#commentsModel.deleteComment(update);
         break;
     }
   };

@@ -1,7 +1,8 @@
 import {ModeFilmPresentor, UserAction, UpdateType} from '../const.js';
 import {render, replace, remove} from '../framework/render.js';
 import FilmView from '../view/film-view.js';
-import PopupView from '../view/popup-view';
+import PopupView from '../view/popup-view.js';
+import {generateComment} from '../mock/comment.js';
 
 
 export default class FilmPresenter {
@@ -37,6 +38,7 @@ export default class FilmPresenter {
     this.#popupView.setWatchlistClickHandler(this.#handleWatchClick);
     this.#popupView.setWatchedClickHandler(this.#handleWatchedClick);
     this.#popupView.setFavoritesClickHandler(this.#handleFavoritesClick);
+    this.#popupView.setCommentDeleteHandler(this.#handleCommentDelete);
     this.#popupView.setFormSubmitHandler(this.#handleFormSubmit);
 
     if (!prevFilmView) {
@@ -127,14 +129,45 @@ export default class FilmPresenter {
       });
   };
 
-  #handleFormSubmit = ({film, newComment}) => {
+  #handleFormSubmit = ({film, updateCommentData}) => {
+    // пока добавление так происходит
+    const newComment = {...generateComment(),...updateCommentData};
     this.#changeData(
-      UserAction.UPDATE_COMMENT,
+      UserAction.ADD_COMMENT,
       UpdateType.MINOR,
-      {film, newComment},
+      newComment,
     );
+    this.#changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.MINOR,
+      {
+        ...film,
+        comments:[
+          ...film.comments
+          ,newComment.id
+        ]
+      });
   };
 
+  #handleCommentDelete = ({film, updateCommentData}) => {
+    // пока добавление так происходит
+    console.log(updateCommentData);
+    this.#changeData(
+      UserAction.DELETE_COMMENT,
+      UpdateType.MINOR,
+      updateCommentData,
+    );
+    console.log(film.comments);
+    console.log(film.comments.filter((id) => id!==updateCommentData.id));
+    this.#changeData(
+      UserAction.UPDATE_FILM,
+      UpdateType.MINOR,
+      {
+        ...film,
+        comments:film.comments.filter((id) => id!==updateCommentData.id)
+      });
+  };
+  
   destroy = () => {
     remove(this.#filmView);
     if (!this.isOpenPopup()) {

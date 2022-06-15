@@ -14,7 +14,7 @@ export default class CommentModel  {
     return [...commentIdList].map((id) => this.#comments.find( (comment) => comment.id === id));
   }
 
-  updateComment = (updateType, update) => {
+  updateComment = (update) => {
     const index = this.#comments.findIndex((comment) => comment.id === update.id);
 
     if (index === -1) {
@@ -29,15 +29,14 @@ export default class CommentModel  {
 
   };
 
-  addComment = (updateType, update) => {
+  addComment = (update) => {
     this.#comments = [
       update,
       ...this.#comments,
     ];
-
   };
 
-  deleteComment = (updateType, update) => {
+  deleteComment = (update) => {
     const index = this.#comments.findIndex((comment) => comment.id === update.id);
 
     if (index === -1) {
