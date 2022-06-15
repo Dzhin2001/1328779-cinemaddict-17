@@ -150,12 +150,12 @@ export default class FilmPresenter {
   };
 
   #handleCommentDelete = ({film, updateCommentData}) => {
-    // пока добавление так происходит
-    this.#changeData(
-      UserAction.DELETE_COMMENT,
-      UpdateType.MINOR,
-      updateCommentData,
-    );
+    // пока удаление так происходит
+    // this.#changeData(
+    //   UserAction.DELETE_COMMENT,
+    //   UpdateType.MINOR,
+    //   updateCommentData,
+    // );
     this.#changeData(
       UserAction.UPDATE_FILM,
       UpdateType.MINOR,
