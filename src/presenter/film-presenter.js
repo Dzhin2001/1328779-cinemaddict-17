@@ -151,14 +151,11 @@ export default class FilmPresenter {
 
   #handleCommentDelete = ({film, updateCommentData}) => {
     // пока добавление так происходит
-    console.log(updateCommentData);
     this.#changeData(
       UserAction.DELETE_COMMENT,
       UpdateType.MINOR,
       updateCommentData,
     );
-    console.log(film.comments);
-    console.log(film.comments.filter((id) => id!==updateCommentData.id));
     this.#changeData(
       UserAction.UPDATE_FILM,
       UpdateType.MINOR,
@@ -167,7 +164,7 @@ export default class FilmPresenter {
         comments:film.comments.filter((id) => id!==updateCommentData.id)
       });
   };
-  
+
   destroy = () => {
     remove(this.#filmView);
     if (!this.isOpenPopup()) {
