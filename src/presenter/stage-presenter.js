@@ -107,10 +107,7 @@ export default class StagePresenter {
     this.#renderTopFilmList();
     this.#renderDiscussFilmList();
     if(this.#openedFilmPresenter) {
-      const film = this.films.filter((element) => element.id === this.#openedFilmPresenter.film.id)[0];
-      if (film !== undefined) {
-        this.#openedFilmPresenter.init(film, this.#commentsModel);
-      }
+      this.#openedFilmPresenter.init(this.#filmsModel.films.filter((element) => element.id === this.#openedFilmPresenter.film.id)[0], this.#commentsModel);
     }
   };
 
