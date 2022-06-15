@@ -1,7 +1,7 @@
 import {ModeFilmPresentor, UserAction, UpdateType} from '../const.js';
 import {render, replace, remove} from '../framework/render.js';
 import FilmView from '../view/film-view.js';
-import PopupView from '../view/popupView';
+import PopupView from '../view/popup-view';
 
 
 export default class FilmPresenter {
