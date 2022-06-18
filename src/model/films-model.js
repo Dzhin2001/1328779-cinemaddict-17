@@ -1,6 +1,8 @@
 import Observable from '../framework/observable.js';
 import {sortByCommentedUp, sortByRatingUp} from '../utils/film.js';
 import {UpdateType} from '../const.js';
+import {filter} from "../utils/filter";
+import {getRandomArrayElement} from "../utils/random";
 
 const TOP_RATED_COUNT = 2;
 const MOST_COMMENTED_COUNT = 2;
@@ -30,11 +32,35 @@ export default class FilmModel extends Observable {
   }
 
   getTopRatedFilms() {
-    return [...this.#films].sort(sortByRatingUp).slice(0, TOP_RATED_COUNT);
+    let topRatedFilms = [];
+    const films = [...this.#films]
+      .filter((film) => film.totalRating !== 0)
+      .sort(sortByRatingUp);
+    const ratings = [...new Set(films.map((film) => film.totalRating))].slice(0, TOP_RATED_COUNT);
+    if (ratings.length === 1) {
+      topRatedFilms = films.slice(0, TOP_RATED_COUNT);
+    } else {
+      topRatedFilms = ratings.map(
+        (rating) => getRandomArrayElement(films.filter((film) => film.totalRating === rating))
+      );
+    }
+    return topRatedFilms;
   }
 
   getMostCommentedFilms() {
-    return [...this.#films].sort(sortByCommentedUp).slice(0, MOST_COMMENTED_COUNT);
+    let mostCommentedFilms = [];
+    const films = [...this.#films]
+      .filter((film) => film.comments.length!== 0)
+      .sort(sortByCommentedUp);
+    const commentCounts = [...new Set(films.map((film) => film.comments.length))].slice(0, MOST_COMMENTED_COUNT);
+    if (commentCounts.length === 1) {
+      mostCommentedFilms = films.slice(0, MOST_COMMENTED_COUNT);
+    } else {
+      mostCommentedFilms = commentCounts.map(
+        (commentCount) => getRandomArrayElement( films.filter((film) => film.comments.length === commentCount) )
+      );
+    }
+    return mostCommentedFilms;
   }
 
   updateFilm = async (updateType, update) => {
