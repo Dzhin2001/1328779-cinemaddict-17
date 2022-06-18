@@ -9,11 +9,9 @@ const NoFilmListTitleType = {
 };
 
 const listEmptyTemplate = (filterType) => `
-  <section class="films">
     <section class="films-list">
       <h2 class="films-list__title">${NoFilmListTitleType[filterType]}</h2>
     </section>
-  </section>
   `;
 
 export default class EmptyListView extends AbstractView {

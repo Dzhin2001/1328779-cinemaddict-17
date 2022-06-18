@@ -1,53 +1,71 @@
+import Observable from '../framework/observable.js';
+import {UpdateType} from '../const.js';
 
-export default class CommentModel  {
-  #comments = null;
+export default class CommentModel extends Observable {
+  #comments = [];
+  #commentsApiService = null;
 
-  constructor(comments) {
-    this.#comments = comments;
+  constructor(commentsApiService) {
+    super();
+    this.#commentsApiService = commentsApiService;
   }
+
+  init = async (filmId) => {
+    this.#comments = [];
+    try {
+      const comments = await this.#commentsApiService.init(filmId);
+      this.#comments = comments.map(this.#adaptToClient);
+    } catch(err) {
+      throw new Error(err.message);
+    }
+    this._notify(UpdateType.POPUP);
+  };
 
   get comments() {
     return this.#comments;
   }
 
-  getComments(commentIdList) {
-    return [...commentIdList].map((id) => this.#comments.find( (comment) => comment.id === id));
+  set comments(comments) {
+    this.#comments = comments;
   }
 
-  updateComment = (update) => {
-    const index = this.#comments.findIndex((comment) => comment.id === update.id);
+  #adaptToClient = (comment) => {
+    const adaptedComment = {
+      ...comment,
+      date: comment.date !== null ? new Date(comment.date) : null,
+    };
 
-    if (index === -1) {
-      throw new Error('Can\'t update unexisting comment');
-    }
-
-    this.#comments = [
-      ...this.#comments.slice(0, index),
-      update,
-      ...this.#comments.slice(index + 1),
-    ];
-
+    // Ненужные ключи мы удаляем
+    return adaptedComment;
   };
 
-  addComment = (update) => {
-    this.#comments = [
-      update,
-      ...this.#comments,
-    ];
+  addComment = async (updateType, update) => {
+    let data = null;
+    try {
+      const response = await this.#commentsApiService.addComment(update.filmId, update.comment);
+      this.comments = response.comments;
+      data = {
+        film: null,
+        filmExternal: response.movie,
+      };
+    } catch(err) {
+      throw new Error(err.message);
+    }
+    this._notify(updateType, data);
   };
 
-  deleteComment = (update) => {
-    const index = this.#comments.findIndex((comment) => comment.id === update.id);
-
-    if (index === -1) {
-      throw new Error('Can\'t delete unexisting comment');
+  deleteComment = async (updateType, update) => {
+    let data = null;
+    try {
+      await this.#commentsApiService.deleteComment(update.commentId);
+      data = {
+        film: update.film,
+        filmExternal: null,
+      };
+    } catch(err) {
+      throw new Error(err.message);
     }
-
-    this.#comments = [
-      ...this.#comments.slice(0, index),
-      ...this.#comments.slice(index + 1),
-    ];
-
+    this._notify(updateType, data);
   };
 
 }

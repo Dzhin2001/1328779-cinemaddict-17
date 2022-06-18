@@ -6,6 +6,7 @@ import SortListView from '../view/sort-list-view.js';
 import ButtonMoreView from '../view/button-more-view.js';
 import StageView from '../view/stage-view.js';
 import EmptyListView from '../view/empty-list-view.js';
+import LoadingView from '../view/loading-view.js';
 import FilmsTopView from '../view/films-top-view.js';
 import FilmsDiscussView from '../view/films-discuss-view.js';
 import FilmsListView from '../view/films-list-view.js';
@@ -20,6 +21,7 @@ export default class StagePresenter {
   #renderedFilmCount = FILM_COUNT_PER_STEP;
   #filmListSortType = SortType.DEFAULT;
   #filmListFilterType = FilterType.ALL;
+  #isLoading = true;
 
   #filmPresenter = new Map();
   #openedFilmPresenter = null;
@@ -32,6 +34,7 @@ export default class StagePresenter {
 
   #sortListView = null;
   #emptyListView = null;
+  #loadingView = new LoadingView();
   #filmsListView = null;
   #filmsTopView = null;
   #filmsDiscussView = null;
@@ -44,6 +47,7 @@ export default class StagePresenter {
     this.#commentsModel = commentsModel;
     this.#filterModel = filterModel;
     this.#filmsModel.addObserver(this.#handleModelEvent);
+    this.#commentsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
@@ -54,13 +58,13 @@ export default class StagePresenter {
 
     switch (this.#filmListSortType) {
       case SortType.DATE_UP:
-        return filteredFilms.sort(sortByDateUp);
+        return [...filteredFilms].sort(sortByDateUp);
       case SortType.DATE_DOWN:
-        return filteredFilms.sort(sortByDateDown);
+        return [...filteredFilms].sort(sortByDateDown);
       case SortType.RATING_UP:
-        return filteredFilms.sort(sortByRatingUp);
+        return [...filteredFilms].sort(sortByRatingUp);
       case SortType.RATING_DOWN:
-        return filteredFilms.sort(sortByRatingDown);
+        return [...filteredFilms].sort(sortByRatingDown);
       default:
         return filteredFilms;
     }
@@ -82,6 +86,10 @@ export default class StagePresenter {
     this.#filmsListContainer = this.#stageView.element;
   };
 
+  #renderLoading = () => {
+    render(this.#loadingView, this.#filmsListContainer);
+  };
+
   #renderEmptyList = () => {
     this.#emptyListView = new EmptyListView(this.#filmListFilterType);
     render(this.#emptyListView, this.#filmsListContainer);
@@ -94,13 +102,18 @@ export default class StagePresenter {
   };
 
   #renderStage = () => {
+    this.#renderStageContainer();
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
     const films = this.films;
     const filmCount = films.length;
     if (filmCount === 0) {
-      this.#renderStageContainer();
       this.#renderEmptyList();
       return;
     }
+    remove(this.#stageView);
     this.#renderSortList();
     this.#renderStageContainer();
     this.#renderFilmList();
@@ -114,7 +127,6 @@ export default class StagePresenter {
   #clearStage = ({resetRenderedFilmCount = false, resetSortType = false} = {}) => {
     const filmCount = this.films.length;
     // ловим презентор с открытым Попап
-    //this.#openedFilmPresenter = [].concat(...Array.from(this.#filmPresenter.values())).filter((presenter) => presenter.isOpenPopup())[0];
     this.#filmPresenter.forEach((presenters) => presenters.forEach( (presenter) => {
       if(presenter.destroy()) {
         this.#openedFilmPresenter = presenter;
@@ -125,10 +137,12 @@ export default class StagePresenter {
     if (this.#emptyListView) {
       remove(this.#emptyListView);
     }
+    remove(this.#loadingView);
+    remove(this.#btnMoreView);
     remove(this.#filmsListView);
     remove(this.#filmsTopView);
     remove(this.#filmsDiscussView);
-    remove(this.#btnMoreView);
+    remove(this.#stageView);
     if (resetRenderedFilmCount) {
       this.#renderedFilmCount = FILM_COUNT_PER_STEP;
     } else {
@@ -136,6 +150,13 @@ export default class StagePresenter {
     }
     if (resetSortType) {
       this.#filmListSortType = SortType.DEFAULT;
+    }
+  };
+
+  #clearFilmPopup = () => {
+    if(this.#openedFilmPresenter) {
+      this.#openedFilmPresenter.popupClose();
+      this.#openedFilmPresenter = null;
     }
   };
 
@@ -200,13 +221,6 @@ export default class StagePresenter {
     this.#filmPresenter.set(film.id, presenters);
   };
 
-  #clearFilmPopup = () => {
-    if(this.#openedFilmPresenter) {
-      this.#openedFilmPresenter.popupClose();
-      this.#openedFilmPresenter = null;
-    }
-  };
-
   #handleModeChange = () => {
     this.#filmPresenter.forEach(
       (presenters) => presenters.forEach((presenter) => presenter.popupClose())
@@ -221,20 +235,11 @@ export default class StagePresenter {
       case UserAction.UPDATE_FILM:
         this.#filmsModel.updateFilm(updateType, update);
         break;
-      case UserAction.ADD_FILM:
-        this.#filmsModel.addFilm(updateType, update);
-        break;
-      case UserAction.DELETE_FILM:
-        this.#filmsModel.deleteFilm(updateType, update);
-        break;
-      case UserAction.UPDATE_COMMENT:
-        this.#commentsModel.updateComment(update);
-        break;
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(update);
+        this.#commentsModel.addComment(updateType, update);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(update);
+        this.#commentsModel.deleteComment(updateType, update);
         break;
     }
   };
@@ -250,12 +255,27 @@ export default class StagePresenter {
           .forEach( (presenter) => presenter.init(data, this.#commentsModel));
         break;
       case UpdateType.MINOR:
+        if (data) {
+          this.#filmsModel.updateLocalFilm(updateType, data);
+        }
         this.#clearStage();
         this.#renderStage();
         break;
       case UpdateType.MAJOR:
         this.#clearStage({resetRenderedFilmCount: true, resetSortType: true});
         this.#renderStage();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingView);
+        remove(this.#stageView);
+        this.#renderStage();
+        break;
+      case UpdateType.POPUP:
+        if (!this.#openedFilmPresenter) {
+          this.#openedFilmPresenter = [].concat(...Array.from(this.#filmPresenter.values())).filter((presenter) => presenter.isOpenPopup())[0];
+        }
+        this.#openedFilmPresenter.initPopup();
         break;
     }
   };

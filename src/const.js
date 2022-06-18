@@ -1,6 +1,3 @@
-const FILMS_COUNT = 20;
-const COMMENTS_COUNT = 25;
-
 const EMOTIONS = [
   'smile',
   'sleeping',
@@ -36,6 +33,8 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
+  POPUP: 'POPUP',
 };
 
 const FilterType = {
@@ -45,4 +44,4 @@ const FilterType = {
   FAVORITES: 'favorites',
 };
 
-export {FILMS_COUNT, COMMENTS_COUNT, SortType, ModeFilmPresentor, UserAction, UpdateType, EMOTIONS, FilterType};
+export {SortType, ModeFilmPresentor, UserAction, UpdateType, EMOTIONS, FilterType};

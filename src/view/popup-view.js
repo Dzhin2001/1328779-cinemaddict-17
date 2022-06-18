@@ -65,7 +65,7 @@ const popupComment = (comment) => `
               <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
             </span>
             <div>
-              <p class="film-details__comment-text">${comment.comment}</p>
+              <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
               <p class="film-details__comment-info">
                 <span class="film-details__comment-author">${comment.author}</span>
                 <span class="film-details__comment-day">${dateComment(comment.date)}</span>
@@ -290,13 +290,7 @@ export default class PopupView extends AbstractStatefulView {
   #deleteCommentHandler = (evt) => {
     evt.preventDefault();
     this.prevScrollTop = this.element.scrollTop;
-    const updateCommentData = {
-      id: +evt.target.dataset.commentId
-    };
-    this._callback.deleteCommentClick({
-      film:PopupView.parseStateToFilm(this._state).film
-      , updateCommentData
-    });
+    this._callback.deleteCommentClick(evt.target.dataset.commentId);
   };
 
 
@@ -324,7 +318,7 @@ export default class PopupView extends AbstractStatefulView {
       evt.preventDefault();
       this.prevScrollTop = this.element.scrollTop;
       this._callback.formSubmit(
-        PopupView.parseStateToFilm(this._state)
+        PopupView.parseStateToFilm(this._state).updateCommentData
       );
     }
   };

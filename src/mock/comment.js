@@ -26,13 +26,13 @@ const COMMENTS = [
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
-let idComment = 0;
+let idComment = 841830;
 
 const getIdComment = () => ++idComment;
 
 
 const generateComment = () => ({
-  id: getIdComment(),
+  id: getIdComment().toString(),
   author: getRandomArrayElement(NAMES),
   comment: getRandomArrayElement(COMMENTS),
   date: getRandomDate(dayjs().subtract(6, 'month')),
