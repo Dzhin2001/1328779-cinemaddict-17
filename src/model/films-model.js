@@ -1,7 +1,6 @@
 import Observable from '../framework/observable.js';
 import {sortByCommentedUp, sortByRatingUp} from '../utils/film.js';
 import {UpdateType} from '../const.js';
-import ApiService from "../framework/api-service";
 
 const TOP_RATED_COUNT = 2;
 const MOST_COMMENTED_COUNT = 2;
@@ -30,6 +29,14 @@ export default class FilmModel extends Observable {
     return this.#films;
   }
 
+  getTopRatedFilms() {
+    return [...this.#films].sort(sortByRatingUp).slice(0, TOP_RATED_COUNT);
+  }
+
+  getMostCommentedFilms() {
+    return [...this.#films].sort(sortByCommentedUp).slice(0, MOST_COMMENTED_COUNT);
+  }
+
   updateFilm = async (updateType, update) => {
     let data = null;
     try {
@@ -56,18 +63,6 @@ export default class FilmModel extends Observable {
       ...this.#films.slice(index + 1),
     ];
   };
-
-  get films() {
-    return this.#films;
-  }
-
-  getTopRatedFilms() {
-    return [...this.#films].sort(sortByRatingUp).slice(0, TOP_RATED_COUNT);
-  }
-
-  getMostCommentedFilms() {
-    return [...this.#films].sort(sortByCommentedUp).slice(0, MOST_COMMENTED_COUNT);
-  }
 
   #adaptToClient = (film) => {
     const adaptedFilm = {
