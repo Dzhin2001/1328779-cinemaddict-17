@@ -1,8 +1,7 @@
 import Observable from '../framework/observable.js';
 import {sortByCommentedUp, sortByRatingUp} from '../utils/film.js';
 import {UpdateType} from '../const.js';
-import {filter} from "../utils/filter";
-import {getRandomArrayElement} from "../utils/random";
+import {getRandomArrayElement} from '../utils/random.js';
 
 const TOP_RATED_COUNT = 2;
 const MOST_COMMENTED_COUNT = 2;
