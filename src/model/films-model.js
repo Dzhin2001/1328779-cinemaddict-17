@@ -20,10 +20,10 @@ export default class FilmModel extends Observable {
     try {
       const films = await this.#filmsApiService.films;
       this.#films = films.map(this.#adaptToClient);
+      this._notify(UpdateType.INIT);
     } catch(err) {
       throw new Error(err.message);
     }
-    this._notify(UpdateType.INIT);
   };
 
   get films() {
@@ -70,13 +70,14 @@ export default class FilmModel extends Observable {
         film: this.#adaptToClient(response),
         filmExternal: null,
       };
+      this.updateLocalFilm(data);
+      this._notify(updateType);
     } catch(err) {
       throw new Error(err.message);
     }
-    this._notify(updateType, data);
   };
 
-  updateLocalFilm = (updateType, data) => {
+  updateLocalFilm = (data) => {
     const update = data.film ? data.film : this.#adaptToClient(data.filmExternal);
     const index = this.#films.findIndex((film) => film.id === update.id);
     if (index === -1) {

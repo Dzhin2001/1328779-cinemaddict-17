@@ -1,4 +1,4 @@
-import {ModeFilmPresentor, UserAction, UpdateType} from '../const.js';
+import {ModeFilmPresentor, UserAction, UpdateType, EditAction} from '../const.js';
 import {render, replace, remove} from '../framework/render.js';
 import FilmView from '../view/film-view.js';
 import PopupView from '../view/popup-view.js';
@@ -63,6 +63,37 @@ export default class FilmPresenter {
   };
 
   isOpenPopup = () => (this.#mode === ModeFilmPresentor.POPUP);
+
+  setSaving = () => {
+    this.#popupView.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
+  setDeleting = () => {
+    this.#popupView.updateElement({
+      isDisabled: true,
+      isDeleting: true,
+    });
+  };
+
+  setAborting = (action) => {
+    const resetFormState = () => {
+      this.#popupView.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    if (action === EditAction.SAVING) {
+      this.#popupView.shake(resetFormState);
+      return;
+    }
+    this.#popupView.shake(resetFormState);
+  };
+
 
   #popupOpen = () => {
     this.#changeMode();

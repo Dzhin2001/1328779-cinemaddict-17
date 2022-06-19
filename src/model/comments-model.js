@@ -48,24 +48,19 @@ export default class CommentModel extends Observable {
         film: null,
         filmExternal: response.movie,
       };
+      return {data, cb: () => this._notify(updateType)};
     } catch(err) {
       throw new Error(err.message);
     }
-    this._notify(updateType, data);
   };
 
   deleteComment = async (updateType, update) => {
-    let data = null;
     try {
       await this.#commentsApiService.deleteComment(update.commentId);
-      data = {
-        film: update.film,
-        filmExternal: null,
-      };
+      return {cb: () => this._notify(updateType)};
     } catch(err) {
       throw new Error(err.message);
     }
-    this._notify(updateType, data);
   };
 
 }

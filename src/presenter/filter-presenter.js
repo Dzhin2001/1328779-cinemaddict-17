@@ -21,7 +21,6 @@ export default class FilterPresenter {
 
   get filters() {
     const films = this.#filmsModel.films;
-
     return [
       {
         type: FilterType.ALL,
@@ -49,15 +48,12 @@ export default class FilterPresenter {
   init = () => {
     const filters = this.filters;
     const prevNavListView = this.#navListView;
-
     this.#navListView = new NavListView(filters, this.#filterModel.filter);
     this.#navListView.setFilterTypeChangeHandler(this.#handleFilterTypeChange);
-
     if (prevNavListView === null) {
       render(this.#navListView, this.#mainContainer);
       return;
     }
-
     replace(this.#navListView, prevNavListView);
     remove(prevNavListView);
   };
@@ -70,7 +66,6 @@ export default class FilterPresenter {
     if (this.#filterModel.filter === filterType) {
       return;
     }
-
     this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
   };
 }

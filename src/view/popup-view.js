@@ -14,17 +14,41 @@ const dateComment = (date) => {
   return dayjs1.format('DD/MM/YYYY hh:mm');
 };
 
-const popupDetailsControls = (userDetails) => `
+const popupDetailsControls = (userDetails, isDisabled) => `
       <section class="film-details__controls">
-        <button type="button" class="film-details__control-button ${userDetails.watchlist ? 'film-details__control-button--active' : ''} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-        <button type="button" class="film-details__control-button ${userDetails.alreadyWatched ? 'film-details__control-button--active' : ''} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-        <button type="button" class="film-details__control-button ${userDetails.favorite ? 'film-details__control-button--active' : ''} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
+        <button
+            type="button"
+            class="film-details__control-button ${userDetails.watchlist ? 'film-details__control-button--active' : ''} film-details__control-button--watchlist"
+            id="watchlist"
+            name="watchlist"
+            ${isDisabled ? 'disabled' : ''}
+        >
+                Add to watchlist
+        </button>
+        <button
+            type="button"
+            class="film-details__control-button ${userDetails.alreadyWatched ? 'film-details__control-button--active' : ''} film-details__control-button--watched"
+            id="watched"
+            name="watched"
+            ${isDisabled ? 'disabled' : ''}
+        >
+                Already watched
+        </button>
+        <button
+            type="button"
+            class="film-details__control-button ${userDetails.favorite ? 'film-details__control-button--active' : ''} film-details__control-button--favorite"
+            id="favorite"
+            name="favorite"
+            ${isDisabled ? 'disabled' : ''}
+        >
+                Add to favorites
+        </button>
       </section>
 `;
 
 const getEmotion = (emotion) => (emotion ? `<img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji">` : '');
 
-const popupNewComment = (comment, emotion) => `
+const popupNewComment = (comment, emotion, isDisabled) => `
 
         <div class="film-details__new-comment">
           <div class="film-details__add-emoji-label">
@@ -32,7 +56,12 @@ const popupNewComment = (comment, emotion) => `
           </div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? he.encode(comment) : ''}</textarea>
+            <textarea
+                class="film-details__comment-input"
+                placeholder="Select reaction below and write comment here"
+                name="comment"
+                ${isDisabled ? 'disabled' : ''}
+            >${comment ? he.encode(comment) : ''}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
@@ -59,7 +88,7 @@ const popupNewComment = (comment, emotion) => `
         </div>
 `;
 
-const popupComment = (comment) => `
+const popupComment = (comment, isDisabled, isDeleting) => `
           <li class="film-details__comment">
             <span class="film-details__comment-emoji">
               <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
@@ -69,7 +98,13 @@ const popupComment = (comment) => `
               <p class="film-details__comment-info">
                 <span class="film-details__comment-author">${comment.author}</span>
                 <span class="film-details__comment-day">${dateComment(comment.date)}</span>
-                <button class="film-details__comment-delete" data-comment-id="${comment.id}">Delete</button>
+                <button
+                    class="film-details__comment-delete"
+                    data-comment-id="${comment.id}
+                    ${isDisabled ? 'disabled' : ''}"
+                >
+                    ${isDeleting ? 'Deleting...' :'Delete'}
+                </button>
               </p>
             </div>
           </li>
@@ -158,10 +193,10 @@ const popupTemplate = (_state) => `
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${_state.comments.length}</span></h3>
 
         <ul class="film-details__comments-list">
-          ${popupComments(_state.comments)}
+          ${popupComments(_state.comments, _state.isDisabled ,_state.isDeleting )}
         </ul>
 
-        ${popupNewComment(_state.newComment,_state.newEmotion)}
+        ${popupNewComment(_state.newComment,_state.newEmotion, _state.isDisabled)}
       </section>
     </div>
   </form>
@@ -185,6 +220,8 @@ export default class PopupView extends AbstractStatefulView {
       comments,
       newComment: null,
       newEmotion: null,
+      isDisabled: false,
+      isDeleting: false,
     });
 
   static parseStateToFilm = (state) => {
@@ -194,6 +231,8 @@ export default class PopupView extends AbstractStatefulView {
     const film = {...state, comments};
     delete film.newComment;
     delete film.newEmotion;
+    delete film.isDisabled;
+    delete film.isDeleting;
     // новый комментарий если есть
     let updateCommentData = null;
     if ((state.newComment || '').length > 0 && state.newEmotion) {

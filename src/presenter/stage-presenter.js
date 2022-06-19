@@ -1,6 +1,7 @@
 import {render, remove, RenderPosition} from '../framework/render.js';
 import {sortByDateUp, sortByDateDown, sortByRatingUp, sortByRatingDown} from '../utils/film.js';
-import {SortType, UserAction, UpdateType, FilterType} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, EditAction} from '../const.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import {filter} from '../utils/filter.js';
 import SortListView from '../view/sort-list-view.js';
 import ButtonMoreView from '../view/button-more-view.js';
@@ -13,6 +14,10 @@ import FilmsListView from '../view/films-list-view.js';
 import FilmPresenter from '../presenter/film-presenter.js';
 
 const FILM_COUNT_PER_STEP = 5;
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class StagePresenter {
   #filmsModel = null;
@@ -40,6 +45,8 @@ export default class StagePresenter {
   #filmsDiscussView = null;
   #stageView = null;
   #btnMoreView = null;
+
+  #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
 
   constructor(siteMainElement, filmsModel, commentsModel, filterModel) {
     this.#mainContainer = siteMainElement;
@@ -229,6 +236,7 @@ export default class StagePresenter {
   };
 
   #handleViewAction = (actionType, updateType, update) => {
+    this.#uiBlocker.block();
     //console.log(actionType, updateType, update);
 
     switch (actionType) {
@@ -236,12 +244,37 @@ export default class StagePresenter {
         this.#filmsModel.updateFilm(updateType, update);
         break;
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, update);
+        // данные о фильме приходят из запроса
+        this.#openedFilmPresenter.setSaving();
+        this.#openedFilmPresenter.initPopup();
+        this.#commentsModel.addComment(updateType, update)
+          .then(({data, cb}) => {
+            this.#filmsModel.updateLocalFilm(data);
+            cb();
+          })
+          .catch(() => {
+            this.#openedFilmPresenter.setAborting(EditAction.DELETING);
+          });
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, update);
+        // данные о фильме меняем сами
+        this.#openedFilmPresenter.setDeleting();
+        this.#openedFilmPresenter.initPopup();
+        this.#commentsModel.deleteComment(updateType, update)
+          .then(({cb}) => {
+            const data = {
+              film: update.film,
+              filmExternal: null,
+            };
+            this.#filmsModel.updateLocalFilm(data);
+            cb();
+          })
+          .catch(() => {
+            this.#openedFilmPresenter.setAborting(EditAction.DELETING);
+          });
         break;
     }
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -255,9 +288,6 @@ export default class StagePresenter {
           .forEach( (presenter) => presenter.init(data, this.#commentsModel));
         break;
       case UpdateType.MINOR:
-        if (data) {
-          this.#filmsModel.updateLocalFilm(updateType, data);
-        }
         this.#clearStage();
         this.#renderStage();
         break;
@@ -272,6 +302,7 @@ export default class StagePresenter {
         this.#renderStage();
         break;
       case UpdateType.POPUP:
+        // обновление открытого попапа
         if (!this.#openedFilmPresenter) {
           this.#openedFilmPresenter = [].concat(...Array.from(this.#filmPresenter.values())).filter((presenter) => presenter.isOpenPopup())[0];
         }
