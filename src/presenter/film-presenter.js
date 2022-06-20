@@ -20,7 +20,6 @@ export default class FilmPresenter {
   }
 
   init (film, commentsModel) {
-
     this.film = film;
     this.#commentsModel = commentsModel;
 
