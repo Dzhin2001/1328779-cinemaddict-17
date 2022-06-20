@@ -51,7 +51,7 @@ export default class AbstractView {
 
   /**
    * Метод, реализующий эффект "покачивания головой"
-   * @param {shakeCallback} [element] Элемент, на котором выполняется анимация
+   * @param {shakeCallback} [className] Имя класса внутреннего элемента, на котором выполняется анимация
    * @param {shakeCallback} [callback] Функция, которая будет вызвана после завершения анимации
    */
   shakeByClass(className, callback) {
@@ -59,18 +59,6 @@ export default class AbstractView {
     shakeElement.classList.add(SHAKE_CLASS_NAME);
     setTimeout(() => {
       shakeElement.classList.remove(SHAKE_CLASS_NAME);
-      callback?.();
-    }, SHAKE_ANIMATION_TIMEOUT);
-  }
-
-  /**
-   * Метод, реализующий эффект "покачивания головой"
-   * @param {shakeCallback} [callback] Функция, которая будет вызвана после завершения анимации
-   */
-  shake(callback) {
-    this.element.classList.add(SHAKE_CLASS_NAME);
-    setTimeout(() => {
-      this.element.classList.remove(SHAKE_CLASS_NAME);
       callback?.();
     }, SHAKE_ANIMATION_TIMEOUT);
   }
