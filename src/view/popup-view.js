@@ -2,6 +2,8 @@ import he from 'he';
 import dayjs  from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
+const defautShakeClassListName = '.film-details__controls';
+
 const dateComment = (date) => {
   const dayjs1 = dayjs(date);
   const days =  Math.abs(dayjs().diff(dayjs1,'day'));
@@ -21,35 +23,28 @@ const popupDetailsControls = (userDetails, isDisabled) => `
             class="film-details__control-button ${userDetails.watchlist ? 'film-details__control-button--active' : ''} film-details__control-button--watchlist"
             id="watchlist"
             name="watchlist"
-            ${isDisabled ? 'disabled' : ''}
-        >
-                Add to watchlist
-        </button>
+            ${isDisabled ? ' disabled' : ''}
+        >Add to watchlist</button>
         <button
             type="button"
             class="film-details__control-button ${userDetails.alreadyWatched ? 'film-details__control-button--active' : ''} film-details__control-button--watched"
             id="watched"
             name="watched"
-            ${isDisabled ? 'disabled' : ''}
-        >
-                Already watched
-        </button>
+            ${isDisabled ? ' disabled' : ''}
+        >Already watched</button>
         <button
             type="button"
             class="film-details__control-button ${userDetails.favorite ? 'film-details__control-button--active' : ''} film-details__control-button--favorite"
             id="favorite"
             name="favorite"
-            ${isDisabled ? 'disabled' : ''}
-        >
-                Add to favorites
-        </button>
+            ${isDisabled ? ' disabled' : ''}
+        >Add to favorites</button>
       </section>
 `;
 
 const getEmotion = (emotion) => (emotion ? `<img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji">` : '');
 
 const popupNewComment = (comment, emotion, isDisabled) => `
-
         <div class="film-details__new-comment">
           <div class="film-details__add-emoji-label">
               ${getEmotion(emotion)}
@@ -60,27 +55,43 @@ const popupNewComment = (comment, emotion, isDisabled) => `
                 class="film-details__comment-input"
                 placeholder="Select reaction below and write comment here"
                 name="comment"
-                ${isDisabled ? 'disabled' : ''}
+                ${isDisabled ? ' disabled' : ''}
             >${comment ? he.encode(comment) : ''}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile" ${emotion === 'smile' ? 'checked' : ''}>
+            <input
+                class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile"
+                ${emotion === 'smile' ? 'checked' : ''}
+                ${isDisabled ? ' disabled' : ''}
+            >
             <label class="film-details__emoji-label" for="emoji-smile">
               <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping" ${emotion === 'sleeping' ? 'checked' : ''}>
+            <input
+                class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping"
+                ${emotion === 'sleeping' ? 'checked' : ''}
+                ${isDisabled ? ' disabled' : ''}
+            >
             <label class="film-details__emoji-label" for="emoji-sleeping">
               <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke" ${emotion === 'puke' ? 'checked' : ''}>
+            <input
+                class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke"
+                ${emotion === 'puke' ? 'checked' : ''}
+                ${isDisabled ? ' disabled' : ''}
+            >
             <label class="film-details__emoji-label" for="emoji-puke">
               <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry" ${emotion === 'angry' ? 'checked' : ''}>
+            <input
+                class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry"
+                ${emotion === 'angry' ? 'checked' : ''}
+                ${isDisabled ? ' disabled' : ''}
+            >
             <label class="film-details__emoji-label" for="emoji-angry">
               <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
             </label>
@@ -88,8 +99,8 @@ const popupNewComment = (comment, emotion, isDisabled) => `
         </div>
 `;
 
-const popupComment = (comment, isDisabled, isDeleting) => `
-          <li class="film-details__comment">
+const popupComment = (comment, isDisabled, deletingCommentId) => `
+          <li class="film-details__comment" id="commentId${comment.id}">
             <span class="film-details__comment-emoji">
               <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
             </span>
@@ -100,18 +111,18 @@ const popupComment = (comment, isDisabled, isDeleting) => `
                 <span class="film-details__comment-day">${dateComment(comment.date)}</span>
                 <button
                     class="film-details__comment-delete"
-                    data-comment-id="${comment.id}
-                    ${isDisabled ? 'disabled' : ''}"
+                    data-comment-id="${comment.id}"
+                    ${isDisabled ? ' disabled' : ''}
                 >
-                    ${isDeleting ? 'Deleting...' :'Delete'}
+                    ${comment.id===deletingCommentId ? 'Deleting...' :'Delete'}
                 </button>
               </p>
             </div>
           </li>
 `;
 
-const popupComments = (comments) => [...comments]
-  .map((comment) => popupComment(comment))
+const popupComments = (comments, isDisabled, deletingCommentId) => [...comments]
+  .map((comment) => popupComment(comment, isDisabled, deletingCommentId))
   .join('');
 
 const popupGenres = (genres) => [...genres]
@@ -185,7 +196,7 @@ const popupTemplate = (_state) => `
         </div>
       </div>
 
-      ${popupDetailsControls(_state.userDetails)}
+      ${popupDetailsControls(_state.userDetails, _state.isDisabled)}
     </div>
 
     <div class="film-details__bottom-container">
@@ -193,7 +204,7 @@ const popupTemplate = (_state) => `
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${_state.comments.length}</span></h3>
 
         <ul class="film-details__comments-list">
-          ${popupComments(_state.comments, _state.isDisabled ,_state.isDeleting )}
+          ${popupComments(_state.comments, _state.isDisabled ,_state.deletingCommentId )}
         </ul>
 
         ${popupNewComment(_state.newComment,_state.newEmotion, _state.isDisabled)}
@@ -205,7 +216,6 @@ const popupTemplate = (_state) => `
 
 export default class PopupView extends AbstractStatefulView {
   _state = null;
-  #btnClosePopup = null;
 
   constructor(film, comments, prevScrollTop) {
     super();
@@ -220,20 +230,24 @@ export default class PopupView extends AbstractStatefulView {
       comments,
       newComment: null,
       newEmotion: null,
+      ...PopupView.initStateAddon(),
+    });
+
+  static initStateAddon = () => (
+    {
       isDisabled: false,
-      isDeleting: false,
+      deletingCommentId: false,
+      shakeClassName: defautShakeClassListName,
     });
 
   static parseStateToFilm = (state) => {
-    // возвращаем к первоначальному формату
-    // массив id комментариев
     const comments = state.comments.map((e) => e.id);
     const film = {...state, comments};
     delete film.newComment;
     delete film.newEmotion;
     delete film.isDisabled;
-    delete film.isDeleting;
-    // новый комментарий если есть
+    delete film.deletingCommentId;
+    delete film.shakeClassName;
     let updateCommentData = null;
     if ((state.newComment || '').length > 0 && state.newEmotion) {
       updateCommentData = {
@@ -273,12 +287,22 @@ export default class PopupView extends AbstractStatefulView {
     this.element
       .querySelector('.film-details__comment-input')
       .addEventListener('keydown', this.#onCtrlEnterDown);
+    this.element
+      .querySelector('.film-details__close-btn')
+      .addEventListener('click', this.#btnCloseClickHandler);
+    this.element
+      .querySelector('#watchlist')
+      .addEventListener('click', this.#watchlistClickHandler);
+    this.element
+      .querySelector('#watched')
+      .addEventListener('click', this.#watchedClickHandler);
+    this.element
+      .querySelector('#favorite')
+      .addEventListener('click', this.#favoritesClickHandler);
   };
 
   setCloseClickHandler = (callback) => {
     this._callback.btnCloseClick = callback;
-    this.#btnClosePopup = this.element.querySelector('.film-details__close-btn');
-    this.#btnClosePopup.addEventListener('click', this.#btnCloseClickHandler);
   };
 
   #btnCloseClickHandler = (evt) => {
@@ -288,36 +312,44 @@ export default class PopupView extends AbstractStatefulView {
 
   setWatchlistClickHandler = (callback) => {
     this._callback.watchlistClick = callback;
-    this.element.querySelector('#watchlist').addEventListener('click', this.#watchlistClickHandler);
   };
 
   #watchlistClickHandler = (evt) => {
     evt.preventDefault();
     this.prevScrollTop = this.element.scrollTop;
+    this.updateElement({
+      isDisabled: true,
+      shakeClassName: '.film-details__controls',
+    });
     this._callback.watchlistClick();
-
   };
 
   setWatchedClickHandler = (callback) => {
     this._callback.watchedClick = callback;
-    this.element.querySelector('#watched').addEventListener('click', this.#watchedClickHandler);
   };
 
   #watchedClickHandler = (evt) => {
     evt.preventDefault();
     this.prevScrollTop = this.element.scrollTop;
+    this.updateElement({
+      isDisabled: true,
+      shakeClassName: '.film-details__controls',
+    });
     this._callback.watchedClick();
 
   };
 
   setFavoritesClickHandler = (callback) => {
     this._callback.favoritesClick = callback;
-    this.element.querySelector('#favorite').addEventListener('click', this.#favoritesClickHandler);
   };
 
   #favoritesClickHandler = (evt) => {
     evt.preventDefault();
     this.prevScrollTop = this.element.scrollTop;
+    this.updateElement({
+      isDisabled: true,
+      shakeClassName: '.film-details__controls',
+    });
     this._callback.favoritesClick();
 
   };
@@ -329,7 +361,12 @@ export default class PopupView extends AbstractStatefulView {
   #deleteCommentHandler = (evt) => {
     evt.preventDefault();
     this.prevScrollTop = this.element.scrollTop;
-    this._callback.deleteCommentClick(evt.target.dataset.commentId);
+    this.updateElement({
+      isDisabled: true,
+      deletingCommentId: evt.target.dataset.commentId,
+      shakeClassName: `#commentId${evt.target.dataset.commentId}`,
+    });
+    this._callback.deleteCommentClick(this._state.deletingCommentId);
   };
 
 
@@ -337,14 +374,14 @@ export default class PopupView extends AbstractStatefulView {
     evt.preventDefault();
     this.prevScrollTop = this.element.scrollTop;
     this.updateElement({
-      newEmotion: evt.target.value
+      newEmotion: evt.target.value,
     });
   };
 
   #commentInputHandler = (evt) => {
     evt.preventDefault();
     this._setState({
-      newComment: evt.target.value
+      newComment: evt.target.value,
     });
   };
 
@@ -356,6 +393,10 @@ export default class PopupView extends AbstractStatefulView {
     if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)) {
       evt.preventDefault();
       this.prevScrollTop = this.element.scrollTop;
+      this.updateElement({
+        isDisabled: true,
+        shakeClassName: '.film-details__new-comment',
+      });
       this._callback.formSubmit(
         PopupView.parseStateToFilm(this._state).updateCommentData
       );

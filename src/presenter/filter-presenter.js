@@ -1,6 +1,6 @@
 import {render, replace, remove} from '../framework/render.js';
 import NavListView from '../view/nav-list-view.js';
-import {filter} from '../utils/filter.js';
+import {filterAction} from '../utils/filter.js';
 import {FilterType, UpdateType} from '../const.js';
 
 export default class FilterPresenter {
@@ -25,22 +25,22 @@ export default class FilterPresenter {
       {
         type: FilterType.ALL,
         name: 'All movies',
-        count: filter[FilterType.ALL](films).length,
+        count: filterAction[FilterType.ALL](films).length,
       },
       {
         type: FilterType.WATCHLIST,
         name: 'Watchlist',
-        count: filter[FilterType.WATCHLIST](films).length,
+        count: filterAction[FilterType.WATCHLIST](films).length,
       },
       {
         type: FilterType.HISTORY,
         name: 'History',
-        count: filter[FilterType.HISTORY](films).length,
+        count: filterAction[FilterType.HISTORY](films).length,
       },
       {
         type: FilterType.FAVORITES,
         name: 'Favorites',
-        count: filter[FilterType.FAVORITES](films).length,
+        count: filterAction[FilterType.FAVORITES](films).length,
       },
     ];
   }

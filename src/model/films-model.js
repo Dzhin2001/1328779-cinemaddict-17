@@ -108,8 +108,6 @@ export default class FilmModel extends Observable {
         watchingDate: film['user_details']['watching_date'] !== null ? new Date(film['user_details']['watching_date']) : null,
       }
     };
-
-    // Ненужные ключи мы удаляем
     delete adaptedFilm['alternative_title'];
     delete adaptedFilm['age_rating'];
     delete adaptedFilm['total_rating'];

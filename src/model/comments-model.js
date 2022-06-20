@@ -34,8 +34,6 @@ export default class CommentModel extends Observable {
       ...comment,
       date: comment.date !== null ? new Date(comment.date) : null,
     };
-
-    // Ненужные ключи мы удаляем
     return adaptedComment;
   };
 

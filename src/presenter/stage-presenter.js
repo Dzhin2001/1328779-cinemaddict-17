@@ -1,8 +1,8 @@
 import {render, remove, RenderPosition} from '../framework/render.js';
 import {sortByDateUp, sortByDateDown, sortByRatingUp, sortByRatingDown} from '../utils/film.js';
-import {SortType, UserAction, UpdateType, FilterType, EditAction} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType} from '../const.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-import {filter} from '../utils/filter.js';
+import {filterAction} from '../utils/filter.js';
 import SortListView from '../view/sort-list-view.js';
 import ButtonMoreView from '../view/button-more-view.js';
 import StageView from '../view/stage-view.js';
@@ -61,7 +61,7 @@ export default class StagePresenter {
   get films () {
     this.#filmListFilterType = this.#filterModel.filter;
     const films = this.#filmsModel.films;
-    const filteredFilms = filter[this.#filmListFilterType](films);
+    const filteredFilms = filterAction[this.#filmListFilterType](films);
 
     switch (this.#filmListSortType) {
       case SortType.DATE_UP:
@@ -133,7 +133,6 @@ export default class StagePresenter {
 
   #clearStage = ({resetRenderedFilmCount = false, resetSortType = false} = {}) => {
     const filmCount = this.films.length;
-    // ловим презентор с открытым Попап
     this.#filmPresenter.forEach((presenters) => presenters.forEach( (presenter) => {
       if(presenter.destroy()) {
         this.#openedFilmPresenter = presenter;
@@ -237,29 +236,35 @@ export default class StagePresenter {
 
   #handleViewAction = (actionType, updateType, update) => {
     this.#uiBlocker.block();
-    //console.log(actionType, updateType, update);
 
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmsModel.updateFilm(updateType, update);
+        this.#filmsModel.updateFilm(updateType, update)
+          .catch(() => {
+            if (this.#openedFilmPresenter) {
+              this.#openedFilmPresenter.setAbortingPopup();
+              this.#filmPresenter
+                .get(update.id)
+                .forEach((presenter) => presenter.setAbortingCardNoShake());
+            } else {
+              this.#filmPresenter
+                .get(update.id)
+                .forEach((presenter) => presenter.setAbortingCard());
+            }
+          });
         break;
       case UserAction.ADD_COMMENT:
-        // данные о фильме приходят из запроса
-        this.#openedFilmPresenter.setSaving();
-        this.#openedFilmPresenter.initPopup();
         this.#commentsModel.addComment(updateType, update)
           .then(({data, cb}) => {
             this.#filmsModel.updateLocalFilm(data);
             cb();
           })
           .catch(() => {
-            this.#openedFilmPresenter.setAborting(EditAction.DELETING);
+            this.#openedFilmPresenter.setAbortingPopup();
           });
         break;
+
       case UserAction.DELETE_COMMENT:
-        // данные о фильме меняем сами
-        this.#openedFilmPresenter.setDeleting();
-        this.#openedFilmPresenter.initPopup();
         this.#commentsModel.deleteComment(updateType, update)
           .then(({cb}) => {
             const data = {
@@ -270,7 +275,7 @@ export default class StagePresenter {
             cb();
           })
           .catch(() => {
-            this.#openedFilmPresenter.setAborting(EditAction.DELETING);
+            this.#openedFilmPresenter.setAbortingPopup();
           });
         break;
     }
@@ -278,11 +283,8 @@ export default class StagePresenter {
   };
 
   #handleModelEvent = (updateType, data) => {
-    //console.log(updateType, data);
-
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
         this.#filmPresenter
           .get(data.id)
           .forEach( (presenter) => presenter.init(data, this.#commentsModel));
@@ -302,7 +304,6 @@ export default class StagePresenter {
         this.#renderStage();
         break;
       case UpdateType.POPUP:
-        // обновление открытого попапа
         if (!this.#openedFilmPresenter) {
           this.#openedFilmPresenter = [].concat(...Array.from(this.#filmPresenter.values())).filter((presenter) => presenter.isOpenPopup())[0];
         }

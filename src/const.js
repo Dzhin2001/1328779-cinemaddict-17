@@ -1,10 +1,3 @@
-const EMOTIONS = [
-  'smile',
-  'sleeping',
-  'puke',
-  'angry',
-];
-
 const SortType = {
   DEFAULT: 'default',
   RATING_UP: 'by-rating-up',
@@ -22,9 +15,6 @@ const ModeFilmPresentor = {
 
 const UserAction = {
   UPDATE_FILM: 'UPDATE_FILM',
-  ADD_FILM: 'ADD_FILM',
-  DELETE_FILM: 'DELETE_FILM',
-  UPDATE_COMMENT: 'UPDATE_COMMENT',
   ADD_COMMENT: 'ADD_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT',
 };
@@ -48,4 +38,4 @@ const EditAction = {
   SAVING: 'saving',
   DELETING: 'deleting',
 };
-export {SortType, ModeFilmPresentor, UserAction, UpdateType, EMOTIONS, FilterType, EditAction};
+export {SortType, ModeFilmPresentor, UserAction, UpdateType, FilterType, EditAction};

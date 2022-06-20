@@ -2,8 +2,6 @@ import dayjs from 'dayjs';
 
 const sortByCommentedUp = (film1, film2) => (film2.comments.length - film1.comments.length);
 
-const sortByCommentedDown = (film1, film2) => ((-1) * sortByCommentedUp(film1, film2));
-
 const sortByDateUp = (film1, film2) => (dayjs(film2.release.date).diff(dayjs(film1.release.date),'seconds'));
 
 const sortByDateDown = (film1, film2) => ((-1) * sortByDateUp(film1, film2));
@@ -14,7 +12,6 @@ const sortByRatingDown = (film1, film2) => ((-1) * sortByRatingUp(film1, film2))
 
 export {
   sortByCommentedUp,
-  sortByCommentedDown,
   sortByDateUp,
   sortByDateDown,
   sortByRatingUp,

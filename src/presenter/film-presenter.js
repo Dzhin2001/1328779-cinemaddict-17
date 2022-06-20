@@ -1,4 +1,4 @@
-import {ModeFilmPresentor, UserAction, UpdateType, EditAction} from '../const.js';
+import {ModeFilmPresentor, UserAction, UpdateType} from '../const.js';
 import {render, replace, remove} from '../framework/render.js';
 import FilmView from '../view/film-view.js';
 import PopupView from '../view/popup-view.js';
@@ -64,34 +64,27 @@ export default class FilmPresenter {
 
   isOpenPopup = () => (this.#mode === ModeFilmPresentor.POPUP);
 
-  setSaving = () => {
-    this.#popupView.updateElement({
-      isDisabled: true,
-      isSaving: true,
-    });
-  };
-
-  setDeleting = () => {
-    this.#popupView.updateElement({
-      isDisabled: true,
-      isDeleting: true,
-    });
-  };
-
-  setAborting = (action) => {
+  setAbortingCard = () => {
     const resetFormState = () => {
-      this.#popupView.updateElement({
+      this.#filmView.updateElement({
         isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
       });
     };
+    this.#filmView.shake(resetFormState);
+  };
 
-    if (action === EditAction.SAVING) {
-      this.#popupView.shake(resetFormState);
-      return;
-    }
-    this.#popupView.shake(resetFormState);
+  setAbortingCardNoShake = () => {
+    this.#filmView.updateElement({
+      isDisabled: false,
+    });
+  };
+
+  setAbortingPopup = () => {
+    const shakeClassName = this.#popupView._state.shakeClassName;
+    const resetFormState = () => {
+      this.#popupView.updateElement(PopupView.initStateAddon());
+    };
+    this.#popupView.shakeByClass(shakeClassName, resetFormState);
   };
 
 
@@ -165,7 +158,6 @@ export default class FilmPresenter {
   };
 
   #handleFormSubmit = (updateCommentData) => {
-    // пока добавление так происходит
     this.#changeData(
       UserAction.ADD_COMMENT,
       UpdateType.MINOR,
