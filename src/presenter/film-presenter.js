@@ -79,13 +79,34 @@ export default class FilmPresenter {
   };
 
   setAbortingPopup = () => {
-    const shakeClassName = this.#popupView._state.shakeClassName;
+    const shakeClassName = this.#popupView.getShakeClassName();
     const resetFormState = () => {
-      this.#popupView.updateElement(PopupView.initStateAddon());
+      this.#popupView.updateElement({
+        isDisabled: false,
+        deletingCommentId: false,
+        shakeClassName: null,
+      });
     };
     this.#popupView.shakeByClass(shakeClassName, resetFormState);
   };
 
+  popupClose() {
+    if (this.#mode === ModeFilmPresentor.POPUP) {
+      document.removeEventListener('keydown', this.#popupEscKeyDownHandler);
+      document.body.classList.remove('hide-overflow');
+      this.#popupView.element.remove();
+      this.#mode = ModeFilmPresentor.DEFAULT;
+    }
+  }
+
+  destroy = () => {
+    remove(this.#filmView);
+    if (!this.isOpenPopup()) {
+      remove(this.#popupView);
+      return false;
+    }
+    return true;
+  };
 
   #popupOpen = () => {
     this.#changeMode();
@@ -94,24 +115,7 @@ export default class FilmPresenter {
     this.#popupView = null;
     this.initPopup();
     document.body.classList.add('hide-overflow');
-    document.addEventListener('keydown', this.#onPopupEscKeyDown);
-  };
-
-  popupClose() {
-    if (this.#mode === ModeFilmPresentor.POPUP) {
-      document.removeEventListener('keydown', this.#onPopupEscKeyDown);
-      document.body.classList.remove('hide-overflow');
-      this.#popupView.element.remove();
-      this.#mode = ModeFilmPresentor.DEFAULT;
-    }
-  }
-
-
-  #onPopupEscKeyDown = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      this.popupClose();
-    }
+    document.addEventListener('keydown', this.#popupEscKeyDownHandler);
   };
 
   #handlePopupBtnCloseClick = () => {
@@ -180,12 +184,10 @@ export default class FilmPresenter {
       });
   };
 
-  destroy = () => {
-    remove(this.#filmView);
-    if (!this.isOpenPopup()) {
-      remove(this.#popupView);
-      return false;
+  #popupEscKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this.popupClose();
     }
-    return true;
   };
 }

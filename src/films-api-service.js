@@ -6,6 +6,7 @@ const Method = {
 };
 
 export default class FilmApiService extends ApiService {
+
   get films() {
     return this._load({url: 'movies'})
       .then(ApiService.parseResponse);

@@ -204,17 +204,6 @@ export default class StagePresenter {
     films.forEach((film) => this.#renderFilm(film, this.#discussFilmsContainer));
   };
 
-  #handleBtnMoreClick = () => {
-    const filmCount = this.films.length;
-    const newRenderedFilmCount = Math.min(filmCount, this.#renderedFilmCount + FILM_COUNT_PER_STEP);
-    const films = this.films.slice(this.#renderedFilmCount , newRenderedFilmCount);
-    this.#renderFilms(films);
-    this.#renderedFilmCount = newRenderedFilmCount;
-    if (this.#renderedFilmCount >= filmCount) {
-      remove(this.#btnMoreView);
-    }
-  };
-
   #renderFilm = (film, container) => {
     const newFilmPresenter = new FilmPresenter(container, this.#handleViewAction, this.#handleModeChange);
     newFilmPresenter.init(film, this.#commentsModel);
@@ -225,6 +214,16 @@ export default class StagePresenter {
     }
     presenters.push(newFilmPresenter);
     this.#filmPresenter.set(film.id, presenters);
+  };
+
+  #setSortType = (newSortType) => {
+    if (newSortType === SortType.DATE_UP && this.#filmListSortType === SortType.DATE_UP) {
+      this.#filmListSortType = SortType.DATE_DOWN;
+    } else if (newSortType === SortType.RATING_UP && this.#filmListSortType === SortType.RATING_UP) {
+      this.#filmListSortType = SortType.RATING_DOWN;
+    } else {
+      this.#filmListSortType = newSortType;
+    }
   };
 
   #handleModeChange = () => {
@@ -312,16 +311,6 @@ export default class StagePresenter {
     }
   };
 
-  #setSortType = (newSortType) => {
-    if (newSortType === SortType.DATE_UP && this.#filmListSortType === SortType.DATE_UP) {
-      this.#filmListSortType = SortType.DATE_DOWN;
-    } else if (newSortType === SortType.RATING_UP && this.#filmListSortType === SortType.RATING_UP) {
-      this.#filmListSortType = SortType.RATING_DOWN;
-    } else {
-      this.#filmListSortType = newSortType;
-    }
-  };
-
   #handleSortTypeChange = (newSortType) => {
     const prevSortType = this.#filmListSortType;
     this.#setSortType(newSortType);
@@ -330,5 +319,16 @@ export default class StagePresenter {
     }
     this.#clearStage({resetRenderedFilmCount: true});
     this.#renderStage();
+  };
+
+  #handleBtnMoreClick = () => {
+    const filmCount = this.films.length;
+    const newRenderedFilmCount = Math.min(filmCount, this.#renderedFilmCount + FILM_COUNT_PER_STEP);
+    const films = this.films.slice(this.#renderedFilmCount , newRenderedFilmCount);
+    this.#renderFilms(films);
+    this.#renderedFilmCount = newRenderedFilmCount;
+    if (this.#renderedFilmCount >= filmCount) {
+      remove(this.#btnMoreView);
+    }
   };
 }

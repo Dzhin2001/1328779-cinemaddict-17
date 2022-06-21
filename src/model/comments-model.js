@@ -29,14 +29,6 @@ export default class CommentModel extends Observable {
     this.#comments = comments;
   }
 
-  #adaptToClient = (comment) => {
-    const adaptedComment = {
-      ...comment,
-      date: comment.date !== null ? new Date(comment.date) : null,
-    };
-    return adaptedComment;
-  };
-
   addComment = async (updateType, update) => {
     let data = null;
     try {
@@ -59,6 +51,14 @@ export default class CommentModel extends Observable {
     } catch(err) {
       throw new Error(err.message);
     }
+  };
+
+  #adaptToClient = (comment) => {
+    const adaptedComment = {
+      ...comment,
+      date: comment.date !== null ? new Date(comment.date) : null,
+    };
+    return adaptedComment;
   };
 
 }

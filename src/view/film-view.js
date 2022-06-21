@@ -1,9 +1,9 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
-const popupNames = (names) => names.join(', ');
+const getPopupNames = (names) => names.join(', ');
 
 
-const filmCardControls = (userDetails, isDisabled) => `
+const getFilmCardControls = (userDetails, isDisabled) => `
           <div class="film-card__controls">
             <button
                 class="film-card__controls-item ${userDetails.watchlist ? 'film-card__controls-item--active' : ''} film-card__controls-item--add-to-watchlist"
@@ -23,7 +23,7 @@ const filmCardControls = (userDetails, isDisabled) => `
           </div>
 `;
 
-const filmTemplate = (state) => `
+const getFilmTemplate = (state) => `
         <article class="film-card">
           <a class="film-card__link">
             <h3 class="film-card__title">${state.title}</h3>
@@ -31,13 +31,13 @@ const filmTemplate = (state) => `
             <p class="film-card__info">
               <span class="film-card__year">${state.release.date.getFullYear()}</span>
               <span class="film-card__duration">${state.runtime}</span>
-              <span class="film-card__genre">${popupNames(state.genre)}</span>
+              <span class="film-card__genre">${getPopupNames(state.genre)}</span>
             </p>
             <img src="${state.poster}" alt="" class="film-card__poster">
             <p class="film-card__description">${state.description}</p>
             <span class="film-card__comments">${state.comments.length} comments</span>
           </a>
-          ${filmCardControls(state.userDetails, state.isDisabled)}
+          ${getFilmCardControls(state.userDetails, state.isDisabled)}
         </article>
  `;
 
@@ -52,20 +52,8 @@ export default class FilmView extends AbstractStatefulView {
     this.#setInnerHandlers();
   }
 
-  static parseFilmToState = (film) => (
-    {
-      ...film,
-      isDisabled: false,
-    });
-
-  static parseStateToFilm = (state) => {
-    const film = {...state};
-    delete film.isDisabled;
-    return film;
-  };
-
   get template() {
-    return filmTemplate(this._state);
+    return getFilmTemplate(this._state);
   }
 
   _restoreHandlers = () => {
@@ -87,13 +75,21 @@ export default class FilmView extends AbstractStatefulView {
     this._callback.formClick = callback;
   };
 
+  setWatchlistClickHandler = (callback) => {
+    this._callback.watchlistClick = callback;
+  };
+
+  setWatchedClickHandler = (callback) => {
+    this._callback.watchedClick = callback;
+  };
+
+  setFavoritesClickHandler = (callback) => {
+    this._callback.favoritesClick = callback;
+  };
+
   #clickHandler = (evt) => {
     evt.preventDefault();
     this._callback.formClick(FilmView.parseStateToFilm(this._state));
-  };
-
-  setWatchlistClickHandler = (callback) => {
-    this._callback.watchlistClick = callback;
   };
 
   #watchlistClickHandler = (evt) => {
@@ -105,10 +101,6 @@ export default class FilmView extends AbstractStatefulView {
     this._callback.watchlistClick();
   };
 
-  setWatchedClickHandler = (callback) => {
-    this._callback.watchedClick = callback;
-  };
-
   #watchedClickHandler = (evt) => {
     evt.preventDefault();
     evt.stopPropagation();
@@ -118,10 +110,6 @@ export default class FilmView extends AbstractStatefulView {
     this._callback.watchedClick();
   };
 
-  setFavoritesClickHandler = (callback) => {
-    this._callback.favoritesClick = callback;
-  };
-
   #favoritesClickHandler = (evt) => {
     evt.preventDefault();
     evt.stopPropagation();
@@ -129,5 +117,17 @@ export default class FilmView extends AbstractStatefulView {
       isDisabled: true,
     });
     this._callback.favoritesClick();
+  };
+
+  static parseFilmToState = (film) => (
+    {
+      ...film,
+      isDisabled: false,
+    });
+
+  static parseStateToFilm = (state) => {
+    const film = {...state};
+    delete film.isDisabled;
+    return film;
   };
 }

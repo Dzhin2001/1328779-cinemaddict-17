@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {SortType} from '../const.js';
 
-const sortListTemplate = (sortType) => `
+const getSortListTemplate = (sortType) => `
   <ul class="sort">
     <li><a href="#" class="sort__button ${sortType===SortType.DEFAULT?'sort__button--active':''}" data-sort-type="${SortType.DEFAULT}">Sort by default</a></li>
     <li><a href="#" class="sort__button ${sortType===SortType.DATE_UP || sortType===SortType.DATE_DOWN?'sort__button--active':''}" data-sort-type="${SortType.DATE_UP}">Sort by date</a></li>
@@ -18,7 +18,7 @@ export default class SortListView extends AbstractView {
   }
 
   get template() {
-    return sortListTemplate(this.#sortType);
+    return getSortListTemplate(this.#sortType);
   }
 
   setSortTypeChangeHandler = (callback) => {

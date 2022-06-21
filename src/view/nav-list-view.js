@@ -1,21 +1,21 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-const navItemCountTemplate = (filter) => `
+const getNavItemCountTemplate = (filter) => `
         <span class="main-navigation__item-count">${filter.count}</span>
   `;
 
-const navItemTemplate = (filter, currentFilterType) => `
+const getNavItemTemplate = (filter, currentFilterType) => `
     <a href="#"
         class="main-navigation__item ${filter.type===currentFilterType?'main-navigation__item--active':''}"
          data-filter-type="${filter.type}">
         ${filter.name}
-        ${filter.type!=='all'? navItemCountTemplate(filter):''}
+        ${filter.type!=='all'? getNavItemCountTemplate(filter):''}
     </a>
   `;
 
-const navListTemplate = (filters, currentFilterType) => `
+const getNavListTemplate = (filters, currentFilterType) => `
   <nav class="main-navigation">
-    ${filters.map((filter) => navItemTemplate(filter, currentFilterType)).join('')}
+    ${filters.map((filter) => getNavItemTemplate(filter, currentFilterType)).join('')}
   </nav>
   `;
 
@@ -30,7 +30,7 @@ export default class NavListView extends AbstractView {
   }
 
   get template() {
-    return navListTemplate(this.#filters, this.#currentFilterType);
+    return getNavListTemplate(this.#filters, this.#currentFilterType);
   }
 
   setFilterTypeChangeHandler = (callback) => {

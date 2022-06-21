@@ -1,5 +1,5 @@
 import {render} from './framework/render.js';
-import FilmModel from './model/films-model';
+import FilmModel from './model/film-model';
 import CommentModel from './model/comments-model';
 import FilterModel from './model/filter-model.js';
 import StatisticsView from './view/statistics-view.js';

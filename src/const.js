@@ -34,8 +34,4 @@ const FilterType = {
   FAVORITES: 'favorites',
 };
 
-const EditAction = {
-  SAVING: 'saving',
-  DELETING: 'deleting',
-};
-export {SortType, ModeFilmPresentor, UserAction, UpdateType, FilterType, EditAction};
+export {SortType, ModeFilmPresentor, UserAction, UpdateType, FilterType};

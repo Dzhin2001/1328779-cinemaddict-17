@@ -1,12 +1,12 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-const filmsListTemplate = () => `
+const getFilmsListTemplate = () => `
   <section class="films">
   </section>
   `;
 
 export default class StageView extends AbstractView {
   get template() {
-    return filmsListTemplate();
+    return getFilmsListTemplate();
   }
 }
